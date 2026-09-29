@@ -4,6 +4,7 @@ import Logo from './Logo.jsx'
 import { DiscordButton } from './Buttons.jsx'
 import { MEMBERS_ENABLED } from '../config.js'
 import { IconChevron, IconClose, IconMenu } from './Icons.jsx'
+import AuthButton from '../auth/AuthButton.jsx'
 
 export default function Nav() {
   const [sportsOpen, setSportsOpen] = useState(false)
@@ -78,11 +79,10 @@ export default function Nav() {
           <NavLink className="nav-a" to="/analytics">
             Analytics Solutions
           </NavLink>
-          {MEMBERS_ENABLED && (
-            <div className="nav-right">
-              <DiscordButton className="btn-sm" />
-            </div>
-          )}
+          <div className="nav-right">
+            <AuthButton />
+            {MEMBERS_ENABLED && <DiscordButton className="btn-sm" />}
+          </div>
         </nav>
       </div>
     </header>

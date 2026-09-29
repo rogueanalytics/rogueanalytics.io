@@ -10,6 +10,11 @@ import NCAAB from './pages/NCAAB.jsx'
 import Analytics from './pages/Analytics.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { MEMBERS_ENABLED } from './config.js'
+import { AuthProvider } from './auth/AuthProvider.jsx'
+import ProtectedRoute from './auth/ProtectedRoute.jsx'
+import SignIn from './pages/SignIn.jsx'
+import AuthCallback from './pages/AuthCallback.jsx'
+import Account from './pages/Account.jsx'
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation()
@@ -28,7 +33,7 @@ const membersOnly = (el) => (MEMBERS_ENABLED ? el : <Navigate to="/sports/ncaaf"
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
@@ -39,9 +44,22 @@ export default function App() {
           <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />
           <Route path="sports/ncaab" element={<NCAAB />} />
           <Route path="analytics" element={<Analytics />} />
+
+          {/* Accounts */}
+          <Route path="sign-in" element={<SignIn />} />
+          <Route path="auth/callback" element={<AuthCallback />} />
+          <Route
+            path="account"
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </>
+    </AuthProvider>
   )
 }

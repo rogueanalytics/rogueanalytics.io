@@ -25,6 +25,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       # GitHub Pages can't route /sports/ncaaf etc. on its own; serving index.html
       # as the 404 page lets React Router handle deep links and refreshes.
       - run: cp dist/index.html dist/404.html

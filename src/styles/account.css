@@ -1,0 +1,239 @@
+/* Account + sign-in styles.
+   Point these tokens at the site's existing variables if you already have them
+   (e.g. --ra-green: var(--brand-green)). Fallbacks match the knight logo palette. */
+:root {
+  --ra-black: #000000;
+  --ra-surface: #0d120f;
+  --ra-line: #1f2a23;
+  --ra-green: #2fbf5b;
+  --ra-green-ink: #04140a;
+  --ra-text: #eef3ef;
+  --ra-muted: #93a399;
+  --ra-danger: #ff6b6b;
+  --ra-discord: #5865f2;
+}
+
+.ra-auth,
+.ra-account {
+  color: var(--ra-text);
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 4rem 1.25rem 5rem;
+}
+
+.ra-auth-status {
+  color: var(--ra-muted);
+  padding: 4rem 1.25rem;
+  text-align: center;
+}
+
+/* ---------- Sign in ---------- */
+.ra-auth-panel {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+.ra-auth-panel h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  line-height: 1.15;
+  margin: 0 0 1rem;
+}
+.ra-auth-lede {
+  color: var(--ra-muted);
+  line-height: 1.6;
+  margin: 0 0 2rem;
+}
+.ra-auth-fine {
+  color: var(--ra-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-top: 1.5rem;
+}
+.ra-auth-error {
+  color: var(--ra-danger);
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+
+/* ---------- Buttons ---------- */
+.ra-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.8rem 1.25rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.ra-btn:focus-visible {
+  outline: 2px solid var(--ra-green);
+  outline-offset: 3px;
+}
+.ra-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.ra-btn--discord {
+  width: 100%;
+  background: var(--ra-discord);
+  color: #fff;
+}
+.ra-btn--discord:hover:not(:disabled) { background: #4752c4; }
+.ra-btn--primary {
+  background: var(--ra-green);
+  color: var(--ra-green-ink);
+}
+.ra-btn--primary:hover:not(:disabled) { background: #3ad36a; }
+.ra-btn--ghost {
+  background: transparent;
+  color: var(--ra-text);
+  border-color: var(--ra-line);
+}
+.ra-btn--ghost:hover { border-color: var(--ra-muted); }
+
+.ra-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ra-green);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Nav ---------- */
+/* Base look comes from the site's .nav-a; this only lays out the avatar. */
+.ra-nav-auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ra-nav-auth--placeholder {
+  display: inline-block;
+  width: 4.5rem;
+  height: 1.5rem;
+}
+.ra-nav-avatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+}
+
+/* ---------- Account ---------- */
+.ra-account-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--ra-line);
+}
+.ra-account-head h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 0;
+}
+.ra-account-sub {
+  color: var(--ra-muted);
+  margin: 0.25rem 0 0;
+}
+.ra-account-avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  border: 2px solid var(--ra-green);
+}
+.ra-account-avatar--blank {
+  display: grid;
+  place-items: center;
+  background: var(--ra-surface);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.ra-account-notice {
+  border-left: 3px solid var(--ra-green);
+  padding: 0.75rem 1rem;
+  background: var(--ra-surface);
+  margin-top: 2rem;
+}
+.ra-account-section {
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--ra-line);
+}
+.ra-account-section:last-child { border-bottom: 0; }
+.ra-account-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+}
+.ra-account-details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 2rem;
+  margin: 0;
+}
+.ra-account-details dt { color: var(--ra-muted); }
+.ra-account-details dd { margin: 0; }
+.ra-account-empty { color: var(--ra-muted); margin: 0; }
+
+.ra-sub-list { list-style: none; margin: 0; padding: 0; }
+.ra-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem 1.25rem;
+  padding: 0.5rem 0;
+}
+.ra-sub-name { font-weight: 600; }
+.ra-sub-status { text-transform: capitalize; color: var(--ra-green); }
+.ra-sub-status--past_due { color: var(--ra-danger); }
+.ra-sub-renew { color: var(--ra-muted); }
+
+/* Plans: the higher tier is visually heavier, not a row of identical cards */
+.ra-plan-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.25rem;
+}
+.ra-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid var(--ra-line);
+  border-radius: 8px;
+  background: var(--ra-surface);
+}
+.ra-plan:first-child { border-color: var(--ra-green); }
+.ra-plan h3 { margin: 0; font-size: 1.15rem; }
+.ra-plan-price {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ra-plan-price span {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--ra-muted);
+  margin-left: 0.2rem;
+}
+.ra-plan-desc {
+  color: var(--ra-muted);
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+.ra-plan-owned { color: var(--ra-green); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .ra-plan-grid { grid-template-columns: 1fr; }
+  .ra-account-head { grid-template-columns: auto 1fr; }
+  .ra-account-signout { grid-column: 1 / -1; justify-self: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ra-btn { transition: none; }
+}
