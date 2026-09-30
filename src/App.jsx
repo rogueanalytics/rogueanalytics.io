@@ -2,12 +2,11 @@ import { useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
-import Sports from './pages/Sports.jsx'
 import NCAAF from './pages/NCAAF.jsx'
 import Projections from './pages/Projections.jsx'
 import Gamebooks from './pages/Gamebooks.jsx'
-import NCAAB from './pages/NCAAB.jsx'
 import Analytics from './pages/Analytics.jsx'
+import ComingSoon from './pages/ComingSoon.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { MEMBERS_ENABLED } from './config.js'
 import { AuthProvider } from './auth/AuthProvider.jsx'
@@ -38,11 +37,21 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="sports" element={<Sports />} />
           <Route path="sports/ncaaf" element={<NCAAF />} />
           <Route path="sports/ncaaf/projections" element={membersOnly(<Projections />)} />
           <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />
-          <Route path="sports/ncaab" element={<NCAAB />} />
+          {[
+            ['college-football', 'College Football'],
+            ['college-basketball', 'College Basketball'],
+          ].flatMap(([slug, sport]) =>
+            ['Teams', 'Players', 'Projections'].map((page) => (
+              <Route
+                key={`${slug}/${page}`}
+                path={`${slug}/${page.toLowerCase()}`}
+                element={<ComingSoon sport={sport} title={page} />}
+              />
+            )),
+          )}
           <Route path="analytics" element={<Analytics />} />
 
           {/* Accounts */}

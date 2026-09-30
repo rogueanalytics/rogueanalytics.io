@@ -11,7 +11,8 @@ export default function Footer() {
           <span>Built on the wrong side of the counter, run on the right one.</span>
         </div>
         <div className="footer-links">
-          <Link to="/sports">Sports Solutions</Link>
+          <Link to="/college-football/teams">College Football</Link>
+          <Link to="/college-basketball/teams">College Basketball</Link>
           <Link to="/analytics">Analytics Solutions</Link>
           {CONTACT_EMAIL && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
         </div>

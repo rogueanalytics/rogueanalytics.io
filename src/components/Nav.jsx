@@ -6,35 +6,48 @@ import { MEMBERS_ENABLED } from '../config.js'
 import { IconChevron, IconClose, IconMenu } from './Icons.jsx'
 import AuthButton from '../auth/AuthButton.jsx'
 
+const MENUS = [
+  {
+    id: 'cfb',
+    label: 'College Football',
+    base: '/college-football',
+    items: ['Teams', 'Players', 'Projections'],
+  },
+  {
+    id: 'cbb',
+    label: 'College Basketball',
+    base: '/college-basketball',
+    items: ['Teams', 'Players', 'Projections'],
+  },
+]
+
 export default function Nav() {
-  const [sportsOpen, setSportsOpen] = useState(false)
+  const [openId, setOpenId] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
-  const ddRef = useRef(null)
+  const navRef = useRef(null)
 
   // Close menus whenever the route changes
   const [lastPath, setLastPath] = useState(pathname)
   if (pathname !== lastPath) {
     setLastPath(pathname)
-    setSportsOpen(false)
+    setOpenId(null)
     setMenuOpen(false)
   }
 
   useEffect(() => {
-    if (!sportsOpen) return
+    if (!openId) return
     const onDown = (e) => {
-      if (ddRef.current && !ddRef.current.contains(e.target)) setSportsOpen(false)
+      if (navRef.current && !navRef.current.contains(e.target)) setOpenId(null)
     }
-    const onKey = (e) => e.key === 'Escape' && setSportsOpen(false)
+    const onKey = (e) => e.key === 'Escape' && setOpenId(null)
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('mousedown', onDown)
       document.removeEventListener('keydown', onKey)
     }
-  }, [sportsOpen])
-
-  const sportsActive = pathname.startsWith('/sports')
+  }, [openId])
 
   return (
     <header className="nav">
@@ -50,32 +63,30 @@ export default function Nav() {
         >
           {menuOpen ? <IconClose size={22} /> : <IconMenu size={22} />}
         </button>
-        <nav id="nav-menu" className={`nav-menu${menuOpen ? ' open' : ''}`} aria-label="Main">
-          <div className="dd" ref={ddRef}>
-            <button
-              type="button"
-              className={`nav-a${sportsActive ? ' active' : ''}`}
-              aria-expanded={sportsOpen}
-              aria-controls="sports-menu"
-              onClick={() => setSportsOpen((o) => !o)}
-            >
-              Sports Solutions
-              <IconChevron size={14} />
-            </button>
-            {sportsOpen && (
-              <div className="dd-menu" id="sports-menu">
-                <Link className="dd-a" to="/sports/ncaaf">
-                  NCAAF <span className="tag tag-live">Live</span>
-                </Link>
-                <Link className="dd-a" to="/sports/ncaab">
-                  NCAAB <span className="tag">Coming soon</span>
-                </Link>
-                <Link className="dd-a dd-all" to="/sports">
-                  All sports solutions
-                </Link>
-              </div>
-            )}
-          </div>
+        <nav id="nav-menu" className={`nav-menu${menuOpen ? ' open' : ''}`} aria-label="Main" ref={navRef}>
+          {MENUS.map((m) => (
+            <div className="dd" key={m.id}>
+              <button
+                type="button"
+                className={`nav-a${pathname.startsWith(m.base) ? ' active' : ''}`}
+                aria-expanded={openId === m.id}
+                aria-controls={`${m.id}-menu`}
+                onClick={() => setOpenId((o) => (o === m.id ? null : m.id))}
+              >
+                {m.label}
+                <IconChevron size={14} />
+              </button>
+              {openId === m.id && (
+                <div className="dd-menu" id={`${m.id}-menu`}>
+                  {m.items.map((item) => (
+                    <Link className="dd-a" key={item} to={`${m.base}/${item.toLowerCase()}`}>
+                      {item}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
           <NavLink className="nav-a" to="/analytics">
             Analytics Solutions
           </NavLink>

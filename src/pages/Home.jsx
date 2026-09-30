@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import Seam from '../components/Seam.jsx'
 import { ArrowLink } from '../components/Buttons.jsx'
 
@@ -14,7 +13,10 @@ export default function Home() {
             markets and for businesses that run on data.
           </p>
           <div className="btn-row">
-            <ArrowLink to="/sports">Sports Solutions</ArrowLink>
+            <ArrowLink to="/college-football/teams">College Football</ArrowLink>
+            <ArrowLink to="/college-basketball/teams" variant="ghost">
+              College Basketball
+            </ArrowLink>
             <ArrowLink to="/analytics" variant="ghost">
               Analytics Solutions
             </ArrowLink>
@@ -46,29 +48,6 @@ export default function Home() {
         <div className="wrap stack stack--lg">
           <span className="eb eb--muted">What we do</span>
           <div className="grid-2">
-            <div className="card card--dark">
-              <h3 className="disp h3">Sports Solutions</h3>
-              <p className="soft body-lg">
-                Player projections and game-by-game data guides for college football, built on our
-                own spread-free models.
-              </p>
-              <div className="rowlist">
-                <Link to="/sports/ncaaf">
-                  <span>
-                    NCAAF <span className="dim-500">Player Projections and Gamebooks</span>
-                  </span>
-                  <span className="tag tag-live">Live</span>
-                </Link>
-                <Link to="/sports/ncaab">
-                  <span>NCAAB</span>
-                  <span className="tag">Coming soon</span>
-                </Link>
-              </div>
-              <ArrowLink to="/sports" className="self-start">
-                Explore Sports Solutions
-              </ArrowLink>
-            </div>
-
             <div className="card">
               <h3 className="disp h3">Analytics Solutions</h3>
               <p className="body body-lg">

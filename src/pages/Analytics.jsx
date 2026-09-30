@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import Seam from '../components/Seam.jsx'
-import { ArrowLink } from '../components/Buttons.jsx'
 import { CONTACT_EMAIL, FORMSPREE_ID } from '../config.js'
 
 const SERVICES = [
@@ -140,9 +139,6 @@ export default function Analytics() {
                 engine.
               </p>
             </div>
-            <ArrowLink to="/sports" variant="ghost">
-              See Sports Solutions
-            </ArrowLink>
           </div>
         </div>
       </section>
