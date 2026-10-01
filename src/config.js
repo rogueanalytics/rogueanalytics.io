@@ -37,18 +37,19 @@ export const PACKAGES = {
   },
 }
 
-// TODO: replace with the exact column names and order from Unabated's upload template.
+// Keys match the columns of public.projections_cfb_thursday.
 export const PROJECTION_COLUMNS = [
-  { key: 'player', label: 'Player' },
-  { key: 'pos', label: 'Pos' },
+  { key: 'name', label: 'Player' },
+  { key: 'position', label: 'Pos' },
   { key: 'team', label: 'Team' },
-  { key: 'opp', label: 'Opp' },
-  { key: 'kickoff', label: 'Kickoff' },
-  { key: 'pass_yds', label: 'Pass Yds', num: true },
-  { key: 'pass_td', label: 'Pass TD', num: true },
-  { key: 'rush_att', label: 'Rush Att', num: true },
-  { key: 'rush_yds', label: 'Rush Yds', num: true },
-  { key: 'rec', label: 'Rec', num: true },
-  { key: 'rec_yds', label: 'Rec Yds', num: true },
-  { key: 'rec_td', label: 'Rec TD', num: true },
+  { key: 'passing_attempts', label: 'Pass Att', num: true },
+  { key: 'passing_completions', label: 'Pass Cmp', num: true },
+  { key: 'passing_yards', label: 'Pass Yds', num: true },
+  { key: 'passing_touchdowns', label: 'Pass TD', num: true },
+  { key: 'interceptions_thrown', label: 'INT', num: true },
+  { key: 'rushing_attempts', label: 'Rush Att', num: true },
+  { key: 'rushing_yards', label: 'Rush Yds', num: true },
+  { key: 'receptions', label: 'Rec', num: true },
+  { key: 'receiving_yards', label: 'Rec Yds', num: true },
+  { key: 'anytime_touchdown_scorer', label: 'Anytime TD', num: true },
 ]

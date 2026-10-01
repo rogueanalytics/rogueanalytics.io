@@ -56,7 +56,7 @@ function Table({ rows, skeleton, skeletonRows = 12, dim = false }) {
                 </tr>
               ))
             : rows.map((r, i) => (
-                <tr key={`${r.player}-${r.team}-${i}`}>
+                <tr key={r.id ?? `${r.name}-${r.team}-${i}`}>
                   {PROJECTION_COLUMNS.map((c) => (
                     <td key={c.key} className={c.num ? 'num' : ''}>
                       {r[c.key]}
@@ -73,28 +73,22 @@ function Table({ rows, skeleton, skeletonRows = 12, dim = false }) {
 function Live({ data }) {
   const rows = useMemo(() => data.rows || [], [data.rows])
   const [q, setQ] = useState('')
-  const [game, setGame] = useState(ALL)
   const [team, setTeam] = useState(ALL)
   const [pos, setPos] = useState(ALL)
 
-  const games = useMemo(
-    () => [...new Set(rows.map((r) => [r.team, r.opp].sort().join(' vs ')))].sort(),
-    [rows],
-  )
   const teams = useMemo(() => [...new Set(rows.map((r) => r.team))].sort(), [rows])
-  const positions = useMemo(() => [...new Set(rows.map((r) => r.pos))].sort(), [rows])
+  const positions = useMemo(() => [...new Set(rows.map((r) => r.position))].sort(), [rows])
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     return rows.filter(
       (r) =>
         (!needle ||
-          `${r.player} ${r.team} ${r.opp}`.toLowerCase().includes(needle)) &&
-        (game === ALL || [r.team, r.opp].sort().join(' vs ') === game) &&
+          `${r.name} ${r.team}`.toLowerCase().includes(needle)) &&
         (team === ALL || r.team === team) &&
-        (pos === ALL || r.pos === pos),
+        (pos === ALL || r.position === pos),
     )
-  }, [rows, q, game, team, pos])
+  }, [rows, q, team, pos])
 
   const updated = data.updatedAt
     ? new Date(data.updatedAt).toLocaleString('en-US', {
@@ -144,15 +138,6 @@ function Live({ data }) {
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-        </div>
-        <div className="tool">
-          <label htmlFor="proj-game">Game</label>
-          <select id="proj-game" value={game} onChange={(e) => setGame(e.target.value)}>
-            <option>{ALL}</option>
-            {games.map((g) => (
-              <option key={g}>{g}</option>
-            ))}
-          </select>
         </div>
         <div className="tool">
           <label htmlFor="proj-team">Team</label>

@@ -40,17 +40,20 @@ export default function App() {
           <Route path="sports/ncaaf" element={<NCAAF />} />
           <Route path="sports/ncaaf/projections" element={membersOnly(<Projections />)} />
           <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />
+          <Route path="college-football/projections" element={<Projections />} />
           {[
             ['college-football', 'College Football'],
             ['college-basketball', 'College Basketball'],
           ].flatMap(([slug, sport]) =>
-            ['Teams', 'Players', 'Projections'].map((page) => (
-              <Route
-                key={`${slug}/${page}`}
-                path={`${slug}/${page.toLowerCase()}`}
-                element={<ComingSoon sport={sport} title={page} />}
-              />
-            )),
+            ['Teams', 'Players', 'Projections']
+              .filter((page) => !(slug === 'college-football' && page === 'Projections'))
+              .map((page) => (
+                <Route
+                  key={`${slug}/${page}`}
+                  path={`${slug}/${page.toLowerCase()}`}
+                  element={<ComingSoon sport={sport} title={page} />}
+                />
+              )),
           )}
           <Route path="analytics" element={<Analytics />} />
 
