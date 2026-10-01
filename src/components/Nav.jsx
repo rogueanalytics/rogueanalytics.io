@@ -21,6 +21,9 @@ const MENUS = [
   },
 ]
 
+// Hover opens menus on devices with a real pointer; touch devices fall back to tap-to-toggle.
+const canHover = () => window.matchMedia('(hover: hover)').matches
+
 export default function Nav() {
   const [openId, setOpenId] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -65,13 +68,18 @@ export default function Nav() {
         </button>
         <nav id="nav-menu" className={`nav-menu${menuOpen ? ' open' : ''}`} aria-label="Main" ref={navRef}>
           {MENUS.map((m) => (
-            <div className="dd" key={m.id}>
+            <div
+              className="dd"
+              key={m.id}
+              onMouseEnter={() => canHover() && setOpenId(m.id)}
+              onMouseLeave={() => canHover() && setOpenId((o) => (o === m.id ? null : o))}
+            >
               <button
                 type="button"
                 className={`nav-a${pathname.startsWith(m.base) ? ' active' : ''}`}
                 aria-expanded={openId === m.id}
                 aria-controls={`${m.id}-menu`}
-                onClick={() => setOpenId((o) => (o === m.id ? null : m.id))}
+                onClick={() => setOpenId((o) => (canHover() ? m.id : o === m.id ? null : m.id))}
               >
                 {m.label}
                 <IconChevron size={14} />
