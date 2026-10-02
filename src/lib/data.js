@@ -66,3 +66,84 @@ export function useGamebooks() {
   }
   return { freePreview: null, days: [] }
 }
+
+// ---------------------------------------------------------------------
+// Team rankings. The CFB Command Center publishes three tables and a meta
+// table (one row per table and season, with the column definitions). The
+// site only reads them; ranks are computed in the browser (lib/rank.js).
+// ---------------------------------------------------------------------
+
+// Newest season's meta rows, keyed by table name.
+// status: 'loading' | 'error' | 'empty' | 'ready'
+export function useTeamStatsMeta() {
+  const [result, setResult] = useState(null)
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    supabase
+      .from('team_stats_meta')
+      .select('*')
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error) console.error('Failed to load team_stats_meta', error)
+        setResult(error ? { error: true } : { rows: data ?? [] })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [attempt])
+
+  const retry = () => {
+    setResult(null)
+    setAttempt((n) => n + 1)
+  }
+
+  if (!result) return { status: 'loading' }
+  if (result.error) return { status: 'error', retry }
+  if (result.rows.length === 0) return { status: 'empty' }
+  const season = Math.max(...result.rows.map((m) => m.season))
+  const byTable = Object.fromEntries(result.rows.filter((m) => m.season === season).map((m) => [m.table_name, m]))
+  return { status: 'ready', season, byTable }
+}
+
+async function fetchWide(table, season) {
+  const { data, error } = await supabase.from(table).select('*').eq('season', season)
+  if (error) throw error
+  return data
+}
+
+// One team per row for a view's table (all three are wide: one column per stat), fetched
+// whole. Results are cached so switching back is instant.
+// status: 'loading' | 'error' | 'ready'
+export function useTeamStatsRows(table, season) {
+  const key = table && season != null ? `${table}:${season}` : null
+  const [cache, setCache] = useState({})
+  const entry = key ? cache[key] : null
+
+  useEffect(() => {
+    if (!key || entry) return
+    let cancelled = false
+    fetchWide(table, season).then(
+      (rows) => !cancelled && setCache((c) => ({ ...c, [key]: { rows } })),
+      (error) => {
+        console.error(`Failed to load ${table}`, error)
+        if (!cancelled) setCache((c) => ({ ...c, [key]: { error: true } }))
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [key, entry, table, season])
+
+  const retry = () =>
+    setCache((c) => {
+      const next = { ...c }
+      delete next[key]
+      return next
+    })
+
+  if (!entry) return { status: 'loading' }
+  if (entry.error) return { status: 'error', retry }
+  return { status: 'ready', rows: entry.rows }
+}
