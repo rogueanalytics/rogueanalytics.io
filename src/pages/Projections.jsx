@@ -4,6 +4,7 @@ import SubNav from '../components/SubNav.jsx'
 import { DiscordButton } from '../components/Buttons.jsx'
 import { ScheduleCards, ScheduleChips } from '../components/Schedule.jsx'
 import { IconClock, IconDownload, IconLock, IconSearch } from '../components/Icons.jsx'
+import Seg from '../components/Seg.jsx'
 import { PACKAGES, PROJECTION_COLUMNS } from '../config.js'
 import { useProjections } from '../lib/data.js'
 
@@ -71,7 +72,11 @@ function Table({ rows, skeleton, skeletonRows = 12, dim = false }) {
 }
 
 function Live({ data }) {
-  const rows = useMemo(() => data.rows || [], [data.rows])
+  const slates = data.slates
+  const [dayPick, setDayPick] = useState(null)
+  // Default to the earliest day still on the board.
+  const slate = slates.find((s) => s.day === dayPick) ?? slates[0]
+  const rows = useMemo(() => slate?.rows ?? [], [slate])
   const [q, setQ] = useState('')
   const [team, setTeam] = useState(ALL)
   const [pos, setPos] = useState(ALL)
@@ -90,8 +95,8 @@ function Live({ data }) {
     )
   }, [rows, q, team, pos])
 
-  const updated = data.updatedAt
-    ? new Date(data.updatedAt).toLocaleString('en-US', {
+  const updated = slate?.updatedAt
+    ? new Date(slate.updatedAt).toLocaleString('en-US', {
         timeZone: 'America/New_York',
         weekday: 'short',
         month: 'short',
@@ -105,7 +110,7 @@ function Live({ data }) {
     <>
       <div className="desk-head">
         <div className="stack stack--sm">
-          <span className="eb">NCAAF Player Projections{data.week ? `, week ${data.week}` : ''}</span>
+          <span className="eb">NCAAF Player Projections{slate?.week ? `, week ${slate.week}` : ''}</span>
           <h1 className="disp h2">Player Projections</h1>
         </div>
         <div className="btn-row">
@@ -117,15 +122,35 @@ function Live({ data }) {
             type="button"
             className="btn btn-green"
             disabled={data.skeleton || filtered.length === 0}
-            onClick={() => downloadCsv(filtered, `rogue-ncaaf-projections${data.week ? `-wk${data.week}` : ''}.csv`)}
+            onClick={() =>
+              downloadCsv(
+                filtered,
+                `rogue-ncaaf-projections${slate.week ? `-wk${slate.week}` : ''}-${slate.day}.csv`,
+              )
+            }
           >
             <IconDownload size={16} />
-            Download .csv
+            Download {slate ? slate.label : ''} .csv
           </button>
         </div>
       </div>
 
       <div className="panel toolbar">
+        {slates.length > 0 && (
+          <div className="tool">
+            <span className="tool-label">Slate</span>
+            <Seg
+              label="Slate"
+              options={slates.map((s) => [s.day, s.label])}
+              value={slate.day}
+              onChange={(day) => {
+                setDayPick(day)
+                setTeam(ALL)
+                setPos(ALL)
+              }}
+            />
+          </div>
+        )}
         <div className="tool tool--grow">
           <label htmlFor="proj-search">Search</label>
           <div className="search">

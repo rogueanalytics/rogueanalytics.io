@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { IconClock, IconSearch } from '../components/Icons.jsx'
+import Seg from '../components/Seg.jsx'
 import { useTeamStatsMeta, useTeamStatsRows } from '../lib/data.js'
 import { formatStat, rankTeams, rankTone, sortByRank } from '../lib/rank.js'
 
@@ -11,24 +12,6 @@ const VIEWS = [
   { id: 'advanced', label: 'Advanced', table: 'team_stats_advanced' },
   { id: 'adjusted', label: 'Opponent-adjusted', table: 'team_stats_adjusted' },
 ]
-
-function Seg({ label, options, value, onChange, small = false }) {
-  return (
-    <div className={`seg${small ? ' seg--sm' : ''}`} role="group" aria-label={label}>
-      {options.map(([id, text]) => (
-        <button
-          key={id}
-          type="button"
-          aria-pressed={value === id}
-          className={`seg-btn${value === id ? ' on' : ''}`}
-          onClick={() => onChange(id)}
-        >
-          {text}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 function Notice({ title, text, action }) {
   return (

@@ -37,7 +37,7 @@ export const PACKAGES = {
   },
 }
 
-// Keys match the columns of public.projections_cfb_thursday.
+// Keys match the columns of the public.projections_cfb_* tables (thursday, friday, saturday).
 export const PROJECTION_COLUMNS = [
   { key: 'name', label: 'Player' },
   { key: 'position', label: 'Pos' },

@@ -12,7 +12,18 @@ function previewState() {
 // Today's date in Eastern time, as YYYY-MM-DD (matches a Postgres `date` column).
 const todayET = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' })
 
+// One table per slate day, all with the same columns (see PROJECTION_COLUMNS).
+const PROJECTION_SLATES = [
+  { day: 'thursday', label: 'Thursday', table: 'projections_cfb_thursday' },
+  { day: 'friday', label: 'Friday', table: 'projections_cfb_friday' },
+  { day: 'saturday', label: 'Saturday', table: 'projections_cfb_saturday' },
+]
+
+const byName = (a, b) => (a.name ?? '').localeCompare(b.name ?? '')
+
 // status: 'locked' | 'pending' | 'live' | 'off'
+// When live, `slates` lists each day that has projections, in day order:
+// { day, label, rows, week, updatedAt }
 export function useProjections() {
   const { user, hasTier, authLoading, accountLoading } = useAuth()
   const allowed = !!user && hasTier('player_projections')
@@ -22,33 +33,46 @@ export function useProjections() {
     if (!allowed) return
     let cancelled = false
     // Projections expire the day after their game_date. RLS enforces the same rule server-side.
-    supabase
-      .from('projections_cfb_thursday')
-      .select('*')
-      .gte('game_date', todayET())
-      .order('name')
-      .then(({ data, error }) => {
-        if (cancelled) return
-        if (error) console.error('Failed to load projections', error)
-        setResult(data ?? [])
-      })
+    const today = todayET()
+    Promise.all(
+      PROJECTION_SLATES.map(({ table }) =>
+        supabase
+          .from(table)
+          .select('*')
+          .gte('game_date', today)
+          .then(({ data, error }) => {
+            if (error) console.error(`Failed to load ${table}`, error)
+            return data ?? []
+          }),
+      ),
+    ).then((tables) => {
+      if (cancelled) return
+      setResult(
+        PROJECTION_SLATES.map((s, i) => ({ ...s, rows: tables[i].sort(byName) }))
+          .filter((s) => s.rows.length > 0)
+          .map((s) => ({
+            ...s,
+            week: s.rows[0].week,
+            updatedAt: s.rows.reduce((max, r) => (r.updated_at > max ? r.updated_at : max), s.rows[0].updated_at),
+          })),
+      )
+    })
     return () => {
       cancelled = true
     }
   }, [allowed])
 
+  const skeleton = { status: 'live', slates: [], skeleton: true }
   const p = previewState()
-  if (p === 'live') return { status: 'live', rows: [], skeleton: true, updatedAt: null }
+  if (p === 'live') return skeleton
   if (p === 'pending') return { status: 'pending' }
   if (p === 'off') return { status: 'off' }
 
-  if (authLoading || accountLoading) return { status: 'live', rows: [], skeleton: true, updatedAt: null }
+  if (authLoading || accountLoading) return skeleton
   if (!allowed) return { status: 'locked' }
-  if (result === null) return { status: 'live', rows: [], skeleton: true, updatedAt: null }
+  if (result === null) return skeleton
   if (result.length === 0) return { status: 'pending' }
-
-  const updatedAt = result.reduce((max, r) => (r.updated_at > max ? r.updated_at : max), result[0].updated_at)
-  return { status: 'live', rows: result, week: result[0].week, updatedAt }
+  return { status: 'live', slates: result }
 }
 
 export function useGamebooks() {
