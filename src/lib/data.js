@@ -21,6 +21,19 @@ const PROJECTION_SLATES = [
 
 const byName = (a, b) => (a.name ?? '').localeCompare(b.name ?? '')
 
+// PostgREST caps each response at the project's max rows (1000 by default), so
+// fetch in pages until a short page comes back. `build` returns a fresh query.
+const PAGE_SIZE = 1000
+async function fetchAll(build) {
+  const rows = []
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await build().range(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+    rows.push(...data)
+    if (data.length < PAGE_SIZE) return rows
+  }
+}
+
 // status: 'locked' | 'pending' | 'live' | 'off'
 // When live, `slates` lists each day that has projections, in day order:
 // { day, label, rows, week, updatedAt }
@@ -36,14 +49,13 @@ export function useProjections() {
     const today = todayET()
     Promise.all(
       PROJECTION_SLATES.map(({ table }) =>
-        supabase
-          .from(table)
-          .select('*')
-          .gte('game_date', today)
-          .then(({ data, error }) => {
-            if (error) console.error(`Failed to load ${table}`, error)
-            return data ?? []
-          }),
+        // Stable order so pages don't overlap or skip rows.
+        fetchAll(() =>
+          supabase.from(table).select('*').gte('game_date', today).order('team').order('name').order('position'),
+        ).catch((error) => {
+          console.error(`Failed to load ${table}`, error)
+          return []
+        }),
       ),
     ).then((tables) => {
       if (cancelled) return
@@ -131,10 +143,8 @@ export function useTeamStatsMeta() {
   return { status: 'ready', season, byTable }
 }
 
-async function fetchWide(table, season) {
-  const { data, error } = await supabase.from(table).select('*').eq('season', season)
-  if (error) throw error
-  return data
+function fetchWide(table, season) {
+  return fetchAll(() => supabase.from(table).select('*').eq('season', season))
 }
 
 // One team per row for a view's table (all three are wide: one column per stat), fetched
