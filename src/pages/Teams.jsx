@@ -1,9 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { IconClock, IconSearch } from '../components/Icons.jsx'
 import Seg from '../components/Seg.jsx'
 import { useTeamStatsMeta, useTeamStatsRows } from '../lib/data.js'
 import { formatStat, rankTeams, rankTone, sortByRank } from '../lib/rank.js'
+import { teamPath } from '../lib/teams.js'
 
 // Every FBS team, ranked. The data is published by the CFB Command Center; columns,
 // labels, groups and formats all come from team_stats_meta.columns.
@@ -155,7 +156,9 @@ function RankTable({ view, meta, rows, group, perGame }) {
               <tr key={r.team}>
                 <td className={`rk-rank num ${directional ? rankTone(rank, teams) : ''}`}>{rank ?? '—'}</td>
                 <td className="rk-team">
-                  <span className="rk-name">{r.team}</span>
+                  <Link className="rk-name" to={teamPath(r.team)}>
+                    {r.team}
+                  </Link>
                   {r.conference && <span className="rk-conf">{r.conference}</span>}
                 </td>
                 <td className="num">{r.games ?? '—'}</td>

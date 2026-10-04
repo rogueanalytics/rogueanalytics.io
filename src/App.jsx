@@ -5,6 +5,7 @@ import Home from './pages/Home.jsx'
 import NCAAF from './pages/NCAAF.jsx'
 import Projections from './pages/Projections.jsx'
 import Teams from './pages/Teams.jsx'
+import TeamProfile from './pages/TeamProfile.jsx'
 import Gamebooks from './pages/Gamebooks.jsx'
 import Analytics from './pages/Analytics.jsx'
 import ComingSoon from './pages/ComingSoon.jsx'
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />
           <Route path="college-football/projections" element={<Projections />} />
           <Route path="college-football/teams" element={<Teams />} />
+          <Route path="college-football/teams/:slug" element={<TeamProfile />} />
           {[
             ['college-football', 'College Football'],
             ['college-basketball', 'College Basketball'],

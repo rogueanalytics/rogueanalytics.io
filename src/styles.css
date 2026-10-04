@@ -406,6 +406,7 @@ button, input, select, textarea { font: inherit; }
 .rk td.good { color: var(--green); }
 .rk td.bad { color: #ef6a5b; }
 .rk-name { font-weight: 700; }
+a.rk-name:hover { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
 .rk td.rk-none { height: 72px; text-align: left; color: var(--dim); position: sticky; left: 0; }
 .rk-conf { margin-left: 8px; font-size: 12px; color: var(--dim); }
 .rk-foot { margin: 0; border-top: 1px solid var(--inkline); }
