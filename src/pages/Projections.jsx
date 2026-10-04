@@ -104,7 +104,9 @@ function Live({ data }) {
         hour: 'numeric',
         minute: '2-digit',
       }) + ' ET'
-    : '[date and time]'
+    : data.skeleton
+      ? '[date and time]'
+      : null
 
   return (
     <>
@@ -114,10 +116,12 @@ function Live({ data }) {
           <h1 className="disp h2">Player Projections</h1>
         </div>
         <div className="btn-row">
-          <span className="updated">
-            <span className="dot" aria-hidden="true" />
-            Last updated {updated}
-          </span>
+          {updated && (
+            <span className="updated">
+              <span className="dot" aria-hidden="true" />
+              Last updated {updated}
+            </span>
+          )}
           <button
             type="button"
             className="btn btn-green"

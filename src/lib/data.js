@@ -21,6 +21,20 @@ const PROJECTION_SLATES = [
 
 const byName = (a, b) => (a.name ?? '').localeCompare(b.name ?? '')
 
+// Newest row timestamp in a slate, or null. The projection tables are written
+// outside this repo, so accept whichever timestamp column they carry.
+const TIMESTAMP_COLUMNS = ['updated_at', 'last_updated', 'created_at', 'inserted_at']
+function latestTimestamp(rows) {
+  let max = null
+  for (const r of rows) {
+    for (const col of TIMESTAMP_COLUMNS) {
+      const t = Date.parse(r[col])
+      if (!Number.isNaN(t) && (max === null || t > max)) max = t
+    }
+  }
+  return max === null ? null : new Date(max).toISOString()
+}
+
 // PostgREST caps each response at the project's max rows (1000 by default), so
 // fetch in pages until a short page comes back. `build` returns a fresh query.
 const PAGE_SIZE = 1000
@@ -65,7 +79,7 @@ export function useProjections() {
           .map((s) => ({
             ...s,
             week: s.rows[0].week,
-            updatedAt: s.rows.reduce((max, r) => (r.updated_at > max ? r.updated_at : max), s.rows[0].updated_at),
+            updatedAt: latestTimestamp(s.rows),
           })),
       )
     })
