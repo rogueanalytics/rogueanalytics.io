@@ -6,6 +6,7 @@ import NCAAF from './pages/NCAAF.jsx'
 import Projections from './pages/Projections.jsx'
 import Teams from './pages/Teams.jsx'
 import TeamProfile from './pages/TeamProfile.jsx'
+import Players from './pages/Players.jsx'
 import Gamebooks from './pages/Gamebooks.jsx'
 import Analytics from './pages/Analytics.jsx'
 import ComingSoon from './pages/ComingSoon.jsx'
@@ -45,12 +46,13 @@ export default function App() {
           <Route path="college-football/projections" element={<Projections />} />
           <Route path="college-football/teams" element={<Teams />} />
           <Route path="college-football/teams/:slug" element={<TeamProfile />} />
+          <Route path="college-football/players" element={<Players />} />
           {[
             ['college-football', 'College Football'],
             ['college-basketball', 'College Basketball'],
           ].flatMap(([slug, sport]) =>
             ['Teams', 'Players', 'Projections']
-              .filter((page) => !(slug === 'college-football' && (page === 'Projections' || page === 'Teams')))
+              .filter((page) => !(slug === 'college-football' && ['Projections', 'Teams', 'Players'].includes(page)))
               .map((page) => (
                 <Route
                   key={`${slug}/${page}`}

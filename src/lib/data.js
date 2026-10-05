@@ -38,7 +38,7 @@ function latestTimestamp(rows) {
 // PostgREST caps each response at the project's max rows (1000 by default), so
 // fetch in pages until a short page comes back. `build` returns a fresh query.
 const PAGE_SIZE = 1000
-async function fetchAll(build) {
+export async function fetchAll(build) {
   const rows = []
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await build().range(from, from + PAGE_SIZE - 1)
