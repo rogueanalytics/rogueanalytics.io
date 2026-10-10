@@ -134,7 +134,7 @@ export default function Analytics() {
               <span className="eb">Built in-house</span>
               <h3 className="disp h4">CFB Command Center</h3>
               <p className="soft measure">
-                The modeling platform behind our NCAAF products: CollegeFootballData.com ingestion,
+                The modeling platform behind our college football products: CollegeFootballData.com ingestion,
                 weekly depth-chart scraping, opponent-adjusted features, and a player projection
                 engine.
               </p>

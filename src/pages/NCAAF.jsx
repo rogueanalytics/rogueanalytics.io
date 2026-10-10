@@ -1,50 +1,37 @@
 import { Fragment } from 'react'
+import { Link } from 'react-router-dom'
 import Seam from '../components/Seam.jsx'
 import SubNav from '../components/SubNav.jsx'
+import PricingTable from '../components/PricingTable.jsx'
 import { SubscribeButton } from '../components/Buttons.jsx'
-import { IconArrow, IconCheck, IconDash } from '../components/Icons.jsx'
+import { IconArrow, IconCheck } from '../components/Icons.jsx'
 import { DROP_SCHEDULE, PACKAGES } from '../config.js'
+import { usePageMeta } from '../lib/usePageMeta.js'
 
 const CHAIN = ['Team points', 'Plays', 'Pass / rush split', 'Usage shares', 'Player projections']
 
-const COMPARE = [
-  ['Player projections for every slate', true, false],
-  ['Unabated Simulator-ready format', true, false],
-  ['Searchable table and .csv download', true, false],
-  ['Gamebook for every game', true, true],
-  ['Team metrics, depth charts, injuries, starters', true, true],
-]
-
 const STEPS = [
   ['Log in with Discord', 'Your Discord account is your Rogue Analytics login.'],
-  ['Choose a package', 'Player Projections or Gamebooks, billed monthly.'],
-  ['Use the NCAAF menu', 'Projections and Gamebooks unlock based on your package.'],
+  ['Choose a plan', 'Player Projections, billed monthly.'],
+  ['Open the projection table', 'Filter the slate, then download the player projections as a .csv.'],
 ]
 
-function Mark({ on }) {
-  return on ? (
-    <span className="mark mark--on">
-      <IconCheck />
-      <span className="sr-only">Included</span>
-    </span>
-  ) : (
-    <span className="mark">
-      <IconDash />
-      <span className="sr-only">Not included</span>
-    </span>
-  )
-}
-
-function PackageCard({ pkg, dark, badge }) {
+function PackageCard({ pkg, dark, badge, id, soon, cta }) {
   return (
-    <div className={`card pkg${dark ? ' card--dark' : ''}`}>
+    <div className={`card pkg${dark ? ' card--dark' : ''}`} id={id}>
       <div className="pkg-top">
         <span className={`eb${dark ? '' : ' eb--ink'}`}>{pkg.name}</span>
         {badge && <span className="pill">{badge}</span>}
       </div>
       <div className="price">
-        <span className="disp">${pkg.price}</span>
-        <span className="per">/mo</span>
+        {pkg.price != null ? (
+          <>
+            <span className="disp">${pkg.price}</span>
+            <span className="per">{pkg.per ?? '/mo'}</span>
+          </>
+        ) : (
+          <span className="disp h5">Pricing at launch</span>
+        )}
       </div>
       <p className={dark ? 'soft' : 'body'}>{pkg.audience}</p>
       <hr className="rule" />
@@ -56,18 +43,32 @@ function PackageCard({ pkg, dark, badge }) {
           </li>
         ))}
       </ul>
-      <SubscribeButton className="btn-block" />
+      {cta ? (
+        <Link className="btn btn-line btn-block" to={cta.to}>
+          {cta.label}
+        </Link>
+      ) : soon ? (
+        <span className="btn btn-soon btn-block" aria-disabled="true">
+          Coming soon
+        </span>
+      ) : (
+        <SubscribeButton className="btn-block" />
+      )}
     </div>
   )
 }
 
 export default function NCAAF() {
+  usePageMeta(
+    'College Football Projection Plans | Rogue Analytics',
+    'College football player projections for every slate, built bottom-up from team models. Download as .csv in the Unabated Simulator format.',
+  )
   return (
     <>
       <SubNav />
       <section className="dark hero hero--sm">
         <div className="wrap hero-in">
-          <span className="eb">NCAAF, college football</span>
+          <span className="eb">College football</span>
           <h1 className="disp h1 h1--sm">College football, modeled from the ground up.</h1>
           <p className="lede">
             Every player projection is built bottom-up from team-level models, never from the
@@ -95,40 +96,24 @@ export default function NCAAF() {
             <span className="eb eb--muted">Packages</span>
             <h2 className="disp h2">Pick your package.</h2>
           </div>
-          <div className="grid-2 grid-stretch">
-            <PackageCard pkg={PACKAGES.projections} dark badge="Includes Gamebooks" />
-            <PackageCard pkg={PACKAGES.gamebooks} />
+          {/* Lowest price first, matching the homepage. */}
+          <div className="hm-grid-3 grid-stretch">
+            <PackageCard pkg={PACKAGES.gamebooks} badge="Coming soon" id="gamebooks" soon />
+            <PackageCard pkg={PACKAGES.projections} dark badge="Live" id="projections" />
+            <PackageCard
+              pkg={PACKAGES.basketball}
+              badge="Coming soon"
+              id="basketball"
+              cta={{ label: 'Get launch details', to: '/college-basketball' }}
+            />
           </div>
         </div>
       </section>
 
       <section className="section section--flush-top">
         <div className="wrap stack">
-          <h3 className="disp h4">Compare packages</h3>
-          <div className="table-wrap">
-            <table className="compare">
-              <thead>
-                <tr>
-                  <th scope="col">Included</th>
-                  <th scope="col">Player Projections, ${PACKAGES.projections.price}</th>
-                  <th scope="col">Gamebooks, ${PACKAGES.gamebooks.price}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARE.map(([label, a, b]) => (
-                  <tr key={label}>
-                    <th scope="row">{label}</th>
-                    <td>
-                      <Mark on={a} />
-                    </td>
-                    <td>
-                      <Mark on={b} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <h3 className="disp h4">Compare products</h3>
+          <PricingTable />
         </div>
       </section>
 

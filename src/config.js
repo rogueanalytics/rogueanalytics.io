@@ -9,33 +9,95 @@ export const DROP_SCHEDULE = [
   { label: 'Saturday slate', time: '4:00 PM ET', when: 'Friday before' },
 ]
 
+// What each plan includes. Game Book is the game-level analysis; Player Projections adds the
+// player-level work on top, and includes every Game Book.
+export const GAME_BOOK_FEATURES = [
+  'Market consensus spread, total & moneyline',
+  'Rogue projected spread & game total',
+  'Projected team scores & win probabilities',
+  'Offensive & defensive team statistics',
+  'Passing, rushing & receiving analysis',
+  'Passing-location breakdowns',
+  'Opponent-adjusted matchup metrics',
+  'Key matchup insights & statistical takeaways',
+]
+export const PLAYER_FEATURES = ['Individual player projection tables', 'Player projections CSV export']
+
 export const PACKAGES = {
   projections: {
-    name: 'Player Projections',
+    name: 'College Football Player Projections',
     price: 100,
-    audience: 'Built for non-casual bettors and market makers.',
+    audience: 'Built for bettors, traders and market makers who work from their own numbers.',
     includes: [
-      'Player projections for every upcoming slate',
+      'Everything in Game Book, for every game on the slate',
+      ...PLAYER_FEATURES,
+      'CSV columns match the Unabated Simulator upload format',
       'Weekday slates drop at 3:00 PM ET. The Saturday slate drops Friday at 4:00 PM ET',
-      'Formatted to upload directly to the Unabated Simulator',
-      'Searchable, filterable table, or download as .csv',
-      'Access to every Gamebook',
     ],
   },
   gamebooks: {
-    name: 'Gamebooks',
-    price: 25,
-    audience:
-      'A viewing guide going into every game, for metrics-driven fans and bettors who want more data.',
-    includes: [
-      'Metric breakdowns for both teams',
-      'Advanced data analysis',
-      'Depth charts and injury reports',
-      'Roster and starter analysis',
-      'A Gamebook for every game on the slate',
-    ],
+    name: 'College Football Game Book',
+    audience: 'Game-level analysis for every game on the slate, read on the site. No player projections or data download.',
+    includes: GAME_BOOK_FEATURES,
+  },
+  basketball: {
+    name: 'College Basketball Player Projections',
+    price: 200,
+    per: '/mo at launch',
+    audience: 'Player projections for college basketball, built for quantitative analysis. Full contents listed at launch.',
+    includes: ['Individual player projection tables', 'Player projections CSV export'],
   },
 }
+
+// The three products, lowest price first. The homepage cards, the pricing table and the
+// NCAAF page all read from here. status: 'live' | 'soon'.
+export const PRODUCTS = [
+  {
+    id: 'game_book',
+    name: 'College Football Game Book',
+    sport: 'College football',
+    status: 'soon',
+    priceLabel: 'Pricing at launch',
+    summary: 'Game-level analysis for every game on the slate, read on the site.',
+    includes: GAME_BOOK_FEATURES,
+    excludes: ['No player projections or data download'],
+    cta: { label: 'Preview the team metrics', to: '/college-football/teams' },
+  },
+  {
+    id: 'ncaaf_projections',
+    name: 'College Football Player Projections',
+    sport: 'College football',
+    status: 'live',
+    price: 100,
+    summary: 'Everything in Game Book, plus player-level projections for your own research and modeling.',
+    includes: [
+      'Everything in Game Book',
+      ...PLAYER_FEATURES,
+      'Unabated Simulator column format',
+    ],
+    excludes: [],
+    cta: { label: 'Explore Football Projections', to: '/sports/ncaaf' },
+  },
+  {
+    id: 'ncaab_projections',
+    name: 'College Basketball Player Projections',
+    sport: 'College basketball',
+    status: 'soon',
+    price: 200,
+    priceNote: '/month at launch',
+    summary: 'Player projections for college basketball, built for quantitative analysis.',
+    includes: ['Player projections with .csv download'],
+    excludes: ['Full contents listed at launch'],
+    cta: { label: 'Get launch details', to: '/college-basketball' },
+  },
+]
+
+// Pricing comparison, in groups. `values` has one entry per product in PRODUCTS order
+// (true = included) and applies to every row in the group.
+export const COMPARE_GROUPS = [
+  { label: 'Game analysis', rows: GAME_BOOK_FEATURES, values: [true, true, true] },
+  { label: 'Player projections', rows: PLAYER_FEATURES, values: [false, true, true] },
+]
 
 // Keys match the columns of the public.projections_cfb_* tables (thursday, friday, saturday).
 export const PROJECTION_COLUMNS = [

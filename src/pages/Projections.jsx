@@ -112,7 +112,7 @@ function Live({ data }) {
     <>
       <div className="desk-head">
         <div className="stack stack--sm">
-          <span className="eb">NCAAF Player Projections{slate?.week ? `, week ${slate.week}` : ''}</span>
+          <span className="eb">College Football Player Projections{slate?.week ? `, week ${slate.week}` : ''}</span>
           <h1 className="disp h2">Player Projections</h1>
         </div>
         <div className="btn-row">
@@ -203,7 +203,7 @@ function Header() {
   return (
     <div className="desk-head">
       <div className="stack stack--sm">
-        <span className="eb">NCAAF Player Projections</span>
+        <span className="eb">College Football Player Projections</span>
         <h1 className="disp h2">Player Projections</h1>
       </div>
       <ScheduleChips />
@@ -235,7 +235,6 @@ function Locked() {
                 See packages
               </Link>
             </div>
-            <p className="mono small dim">Gamebooks subscribers can upgrade to Player Projections.</p>
           </div>
         </div>
       </div>

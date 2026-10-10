@@ -7,16 +7,14 @@ export default function SubNav() {
   return (
     <div className="subnav">
       <div className="wrap subnav-in">
-        <span className="subnav-label">NCAAF</span>
+        <span className="subnav-label">College Football</span>
         <NavLink end className="nav-a subnav-a" to="/sports/ncaaf">
-          Overview &amp; Packages
+          Overview &amp; Pricing
         </NavLink>
-        <NavLink className="nav-a subnav-a" to="/sports/ncaaf/projections">
+        <NavLink className="nav-a subnav-a" to="/college-football/projections">
           Projections
         </NavLink>
-        <NavLink className="nav-a subnav-a" to="/sports/ncaaf/gamebooks">
-          Gamebooks
-        </NavLink>
+        {/* Game Book tab goes here once Game Books are live. */}
       </div>
     </div>
   )

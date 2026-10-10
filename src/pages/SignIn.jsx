@@ -28,7 +28,7 @@ export default function SignIn() {
       <section className="ra-auth-panel">
         <h1>Sign in to Rogue Analytics</h1>
         <p className="ra-auth-lede">
-          Your account holds your subscriptions and gives you access to projections and gamebooks.
+          Your account holds your subscriptions and gives you access to player projections.
           New here? Signing in with Discord creates your account.
         </p>
 

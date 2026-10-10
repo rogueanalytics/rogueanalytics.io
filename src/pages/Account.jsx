@@ -83,7 +83,7 @@ export default function Account() {
       </section>
 
       <section className="ra-account-section">
-        <h2>NCAAF plans</h2>
+        <h2>College football plans</h2>
         <div className="ra-plan-grid">
           {PLANS.map((plan) => {
             const owned = activeTiers.has(plan.id);

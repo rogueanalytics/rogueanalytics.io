@@ -9,7 +9,8 @@ import TeamProfile from './pages/TeamProfile.jsx'
 import Players from './pages/Players.jsx'
 import Gamebooks from './pages/Gamebooks.jsx'
 import Analytics from './pages/Analytics.jsx'
-import ComingSoon from './pages/ComingSoon.jsx'
+import About from './pages/About.jsx'
+import CollegeBasketball from './pages/CollegeBasketball.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { MEMBERS_ENABLED } from './config.js'
 import { AuthProvider } from './auth/AuthProvider.jsx'
@@ -41,27 +42,18 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="sports/ncaaf" element={<NCAAF />} />
-          <Route path="sports/ncaaf/projections" element={membersOnly(<Projections />)} />
+          {/* One projection table, one address. */}
+          <Route path="sports/ncaaf/projections" element={<Navigate to="/college-football/projections" replace />} />
           <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />
           <Route path="college-football/projections" element={<Projections />} />
           <Route path="college-football/teams" element={<Teams />} />
           <Route path="college-football/teams/:slug" element={<TeamProfile />} />
           <Route path="college-football/players" element={<Players />} />
-          {[
-            ['college-football', 'College Football'],
-            ['college-basketball', 'College Basketball'],
-          ].flatMap(([slug, sport]) =>
-            ['Teams', 'Players', 'Projections']
-              .filter((page) => !(slug === 'college-football' && ['Projections', 'Teams', 'Players'].includes(page)))
-              .map((page) => (
-                <Route
-                  key={`${slug}/${page}`}
-                  path={`${slug}/${page.toLowerCase()}`}
-                  element={<ComingSoon sport={sport} title={page} />}
-                />
-              )),
-          )}
+          <Route path="college-basketball" element={<CollegeBasketball />} />
+          {/* The old basketball placeholders all point at the pre-launch page. */}
+          <Route path="college-basketball/*" element={<Navigate to="/college-basketball" replace />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="about" element={<About />} />
 
           {/* Accounts */}
           <Route path="sign-in" element={<SignIn />} />

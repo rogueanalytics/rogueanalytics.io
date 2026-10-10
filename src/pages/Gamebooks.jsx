@@ -3,7 +3,7 @@ import { ArrowLink, DiscordButton } from '../components/Buttons.jsx'
 import { IconLock } from '../components/Icons.jsx'
 import { useGamebooks } from '../lib/data.js'
 
-const CONTENTS = ['Team metrics', 'Advanced analysis', 'Depth charts', 'Injury report', 'Roster and starters']
+const CONTENTS = ['Team metrics', 'Projected winner', 'Win probability', 'Projected total and score']
 
 const matchup = (g) =>
   g?.away ? (
@@ -28,15 +28,15 @@ export default function Gamebooks() {
       <div className="wrap desk-body">
         <div className="desk-head">
           <div className="stack stack--sm">
-            <span className="eb">NCAAF Gamebooks{week ? `, week ${week}` : ''}</span>
-            <h1 className="disp h2">Gamebooks</h1>
+            <span className="eb">College Football Game Books{week ? `, week ${week}` : ''}</span>
+            <h1 className="disp h2">Game Books</h1>
           </div>
           <p className="soft measure-sm">A data-driven viewing guide for every game on the slate.</p>
         </div>
 
         {!hasGames && (
           <div className="empty">
-            <h2 className="disp h5">This week's Gamebooks aren't posted yet.</h2>
+            <h2 className="disp h5">This week's Game Books aren't posted yet.</h2>
             <p className="soft measure">Matchups will appear here once they're published.</p>
           </div>
         )}
@@ -55,7 +55,7 @@ export default function Gamebooks() {
                 ))}
               </div>
             </div>
-            <ArrowLink to="/sports/ncaaf/gamebooks">Open free Gamebook</ArrowLink>
+            <ArrowLink to="/sports/ncaaf/gamebooks">Open free Game Book</ArrowLink>
           </div>
         )}
 
