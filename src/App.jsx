@@ -33,8 +33,14 @@ function ScrollToTop() {
   return null
 }
 
-// While the members area is switched off, its URLs fall back to the NCAAF overview.
-const membersOnly = (el) => (MEMBERS_ENABLED ? el : <Navigate to="/sports/ncaaf" replace />)
+// While the members area is switched off, its URLs fall back to the college football product page.
+const membersOnly = (el) => (MEMBERS_ENABLED ? el : <Navigate to="/products/college-football" replace />)
+
+// The product page moved from /sports/ncaaf; old links keep their #section.
+function OldNcaafPage() {
+  const { hash } = useLocation()
+  return <Navigate to={{ pathname: '/products/college-football', hash }} replace />
+}
 
 export default function App() {
   return (
@@ -43,7 +49,8 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="sports/ncaaf" element={<NCAAF />} />
+          <Route path="products/college-football" element={<NCAAF />} />
+          <Route path="sports/ncaaf" element={<OldNcaafPage />} />
           {/* One projection table, one address. */}
           <Route path="sports/ncaaf/projections" element={<Navigate to="/college-football/projections" replace />} />
           <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />

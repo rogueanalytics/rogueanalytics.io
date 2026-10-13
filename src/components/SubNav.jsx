@@ -8,7 +8,7 @@ export default function SubNav() {
     <div className="subnav">
       <div className="wrap subnav-in">
         <span className="subnav-label">College Football</span>
-        <NavLink end className="nav-a subnav-a" to="/sports/ncaaf">
+        <NavLink end className="nav-a subnav-a" to="/products/college-football">
           Overview &amp; Pricing
         </NavLink>
         <NavLink className="nav-a subnav-a" to="/college-football/projections">

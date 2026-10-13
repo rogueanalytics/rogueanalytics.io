@@ -11,7 +11,7 @@ const PRODUCT_GROUPS = [
     label: 'Subscriptions',
     items: [
       { label: 'College Football Game Book', to: '/#products', note: 'Every game, broken down', tag: 'Coming soon' },
-      { label: 'College Football Player Projections', to: '/sports/ncaaf', note: 'Player stat lines for every slate · $100/mo', tag: 'Live', live: true },
+      { label: 'College Football Player Projections', to: '/products/college-football', note: 'Player stat lines for every slate · $100/mo', tag: 'Live', live: true },
       { label: 'College Basketball Player Projections', to: '/college-basketball', note: 'College basketball player projections', tag: 'Coming soon' },
     ],
   },
@@ -31,7 +31,7 @@ const LINKS = [
   { label: 'Pricing', to: '/#pricing' },
 ]
 
-const PRODUCT_PATHS = ['/sports', '/college-football', '/college-basketball']
+const PRODUCT_PATHS = ['/products', '/college-football', '/college-basketball']
 
 // Hover opens the menu on devices with a real pointer; touch devices fall back to tap-to-toggle.
 const canHover = () => window.matchMedia('(hover: hover)').matches
@@ -164,7 +164,7 @@ export default function Nav() {
             <AuthButton />
             <Link
               className="btn btn-green btn-sm"
-              to="/sports/ncaaf"
+              to="/college-football/projections"
               onClick={() => track('nav_cta_click', { label: 'Explore Projections' })}
             >
               Explore Projections

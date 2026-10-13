@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import SubNav from '../components/SubNav.jsx'
 import { SignInButton } from '../components/Buttons.jsx'
 import { ScheduleCards, ScheduleChips } from '../components/Schedule.jsx'
@@ -7,6 +7,7 @@ import { IconClock, IconDownload, IconLock, IconSearch } from '../components/Ico
 import Seg from '../components/Seg.jsx'
 import { PACKAGES, PROJECTION_COLUMNS } from '../config.js'
 import { useProjections } from '../lib/data.js'
+import { useAuth } from '../auth/AuthProvider.jsx'
 
 const ALL = 'All'
 
@@ -231,7 +232,7 @@ function Locked() {
             </p>
             <div className="btn-row btn-row--center">
               <SignInButton />
-              <Link className="btn btn-ghost" to="/sports/ncaaf#packages">
+              <Link className="btn btn-ghost" to="/products/college-football#packages">
                 See packages
               </Link>
             </div>
@@ -261,6 +262,9 @@ function Empty({ title, text, next }) {
 
 export default function Projections() {
   const data = useProjections()
+  const { user } = useAuth()
+  // Signed in without the plan: send them to the packages. Signed out stays here so subscribers can log in.
+  if (data.status === 'locked' && user) return <Navigate to="/products/college-football#packages" replace />
   return (
     <div className="desk">
       <SubNav />

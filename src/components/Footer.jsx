@@ -8,7 +8,7 @@ const COLUMNS = [
     label: 'Products',
     links: [
       ['College Football Game Book', '/#products'],
-      ['College Football Player Projections', '/sports/ncaaf'],
+      ['College Football Player Projections', '/products/college-football'],
       ['College Basketball Player Projections', '/college-basketball'],
     ],
   },

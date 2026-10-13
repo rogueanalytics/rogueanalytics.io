@@ -136,7 +136,7 @@ function Hero() {
             numbers and find your own edge.
           </p>
           <div className="btn-row">
-            <ArrowLink to="/sports/ncaaf" onClick={() => track('hero_cta_click', { label: 'Explore Projections' })}>
+            <ArrowLink to="/college-football/projections" onClick={() => track('hero_cta_click', { label: 'Explore Projections' })}>
               Explore Projections
             </ArrowLink>
             <Link className="btn btn-ghost" to="/#how-it-works">
@@ -604,7 +604,7 @@ function Close() {
         <h2 className="disp hm-h2">Bring better data to your next decision.</h2>
         <p className="lede">College football projections for people who want to dig deeper than the box score.</p>
         <div className="btn-row">
-          <ArrowLink to="/sports/ncaaf" onClick={() => track('hero_cta_click', { label: 'Explore Projections', placement: 'close' })}>
+          <ArrowLink to="/college-football/projections" onClick={() => track('hero_cta_click', { label: 'Explore Projections', placement: 'close' })}>
             Explore Projections
           </ArrowLink>
           <Link className="btn btn-ghost" to="/#pricing">

@@ -80,7 +80,7 @@ export const PRODUCTS = [
       'Unabated Simulator column format',
     ],
     excludes: [],
-    cta: { label: 'Explore Football Projections', to: '/sports/ncaaf' },
+    cta: { label: 'Explore Football Projections', to: '/products/college-football' },
   },
   {
     id: 'ncaab_projections',

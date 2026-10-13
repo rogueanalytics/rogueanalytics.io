@@ -40,7 +40,7 @@ export default function CollegeBasketball() {
                 Create your account
               </ArrowLink>
             )}
-            <Link className="btn btn-ghost" to="/sports/ncaaf">
+            <Link className="btn btn-ghost" to="/products/college-football">
               See football projections
             </Link>
           </div>

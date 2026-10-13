@@ -967,7 +967,7 @@ function ThisWeek({ entitled, weekQ, pos, weekMeta }) {
           <strong>Projections are for subscribers</strong>
           <p className="pl-muted">This week's projection is part of the Player Projections package.</p>
         </div>
-        <Link className="btn btn-ghost btn-sm" to="/sports/ncaaf#packages">
+        <Link className="btn btn-ghost btn-sm" to="/products/college-football#packages">
           See packages
         </Link>
       </div>
