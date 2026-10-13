@@ -1,5 +1,5 @@
 import SubNav from '../components/SubNav.jsx'
-import { ArrowLink, DiscordButton } from '../components/Buttons.jsx'
+import { ArrowLink, SignInButton } from '../components/Buttons.jsx'
 import { IconLock } from '../components/Icons.jsx'
 import { useGamebooks } from '../lib/data.js'
 
@@ -63,7 +63,7 @@ export default function Gamebooks() {
           <>
             <div className="list-head">
               <h2 className="disp h5">All matchups</h2>
-              <DiscordButton className="btn-sm">Log in with Discord to unlock</DiscordButton>
+              <SignInButton className="btn-sm">Sign in to unlock</SignInButton>
             </div>
             <div className="panel games">
               {days.map((d) => (

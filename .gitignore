@@ -3,3 +3,6 @@ dist
 .env
 *.local
 .DS_Store
+
+# Sign in with Apple private keys — never commit
+*.p8

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SubNav from '../components/SubNav.jsx'
-import { DiscordButton } from '../components/Buttons.jsx'
+import { SignInButton } from '../components/Buttons.jsx'
 import { ScheduleCards, ScheduleChips } from '../components/Schedule.jsx'
 import { IconClock, IconDownload, IconLock, IconSearch } from '../components/Icons.jsx'
 import Seg from '../components/Seg.jsx'
@@ -230,7 +230,7 @@ function Locked() {
               {PACKAGES.projections.price}/mo).
             </p>
             <div className="btn-row btn-row--center">
-              <DiscordButton />
+              <SignInButton />
               <Link className="btn btn-ghost" to="/sports/ncaaf#packages">
                 See packages
               </Link>

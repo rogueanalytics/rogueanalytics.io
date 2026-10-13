@@ -137,8 +137,6 @@ button, input, select, textarea { font: inherit; }
 .btn-ghost:hover { border-color: #fff; }
 .btn-line { border-color: var(--text); color: var(--text); background: transparent; }
 .btn-line:hover { background: var(--text); color: #fff; }
-.btn-disc { background: var(--discord); color: #fff; }
-.btn-disc:hover { background: var(--discord-hover); }
 .btn-soon { border: 1px dashed currentColor; opacity: 0.7; cursor: default; }
 .btn-sm { min-height: 40px; font-size: 14px; padding: 0 16px; }
 .btn-block { width: 100%; }

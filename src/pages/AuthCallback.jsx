@@ -3,8 +3,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { safeNext, useAuth } from '../auth/AuthProvider';
 import '../styles/account.css';
 
-// Discord -> Supabase -> here. The Supabase client exchanges ?code= for a
-// session on its own (detectSessionInUrl); this page waits, then moves on.
+// Provider (Apple, Google, Discord) -> Supabase -> here. The Supabase client
+// exchanges ?code= for a session on its own (detectSessionInUrl); this page waits, then moves on.
 export default function AuthCallback() {
   const { session } = useAuth();
   const [params] = useSearchParams();
@@ -32,7 +32,7 @@ export default function AuthCallback() {
           <p className="ra-auth-error" role="alert">
             {providerError
               ? decodeURIComponent(providerError.replace(/\+/g, ' '))
-              : 'Discord sent you back, but no session was created.'}
+              : 'You were sent back, but no session was created.'}
           </p>
           <Link to="/sign-in" className="ra-btn ra-btn--primary">Try signing in again</Link>
         </section>

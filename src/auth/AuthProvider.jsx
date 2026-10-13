@@ -6,6 +6,12 @@ const AuthContext = createContext(null);
 
 const LIVE_STATUSES = new Set(['active', 'trialing']);
 
+// Per-provider OAuth options. Google and Apple use Supabase's defaults
+// (email + profile, and email + name).
+const PROVIDER_OPTIONS = {
+  discord: { scopes: 'identify email' },
+};
+
 // Only allow same-site relative paths as post-login destinations.
 export function safeNext(next) {
   if (typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')) return next;
@@ -72,14 +78,19 @@ export function AuthProvider({ children }) {
     refreshAccount();
   }, [userId, refreshAccount]);
 
-  const signInWithDiscord = useCallback(async (next = '/account') => {
+  // OAuth sign-in for any provider enabled in Supabase (apple, google, discord).
+  // Supabase sends the user back to /auth/callback?next=..., where the PKCE code
+  // is exchanged for a session.
+  const signInWithProvider = useCallback(async (provider, next = '/account') => {
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext(next))}`;
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: { redirectTo, scopes: 'identify email' },
+      provider,
+      options: { redirectTo, ...PROVIDER_OPTIONS[provider] },
     });
     if (error) throw error;
   }, []);
+
+  const signInWithDiscord = useCallback((next) => signInWithProvider('discord', next), [signInWithProvider]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
@@ -111,6 +122,7 @@ export function AuthProvider({ children }) {
     accountLoading,
     accountError,
     refreshAccount,
+    signInWithProvider,
     signInWithDiscord,
     signOut,
   };

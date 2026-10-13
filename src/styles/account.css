@@ -2,15 +2,15 @@
    Point these tokens at the site's existing variables if you already have them
    (e.g. --ra-green: var(--brand-green)). Fallbacks match the knight logo palette. */
 :root {
-  --ra-black: #000000;
-  --ra-surface: #0d120f;
-  --ra-line: #1f2a23;
-  --ra-green: #2fbf5b;
+  --ra-black: var(--ink);
+  --ra-surface: var(--card);
+  --ra-line: var(--line);
+  --ra-green: var(--green);
   --ra-green-ink: #04140a;
-  --ra-text: #eef3ef;
-  --ra-muted: #93a399;
-  --ra-danger: #ff6b6b;
-  --ra-discord: #5865f2;
+  --ra-text: var(--text);
+  --ra-muted: var(--muted);
+  --ra-danger: #c0392b;
+  --ra-discord: var(--discord);
 }
 
 .ra-auth,
@@ -77,12 +77,37 @@
   cursor: not-allowed;
   opacity: 0.5;
 }
+/* Provider buttons, styled per each brand's rules for light backgrounds:
+   Apple black (HIG), Google neutral light (Google sign-in branding). */
+.ra-auth-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.ra-btn-logo {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+}
+.ra-btn--apple,
+.ra-btn--google,
+.ra-btn--discord { width: 100%; }
+.ra-btn--apple {
+  background: #000;
+  color: #fff;
+}
+.ra-btn--apple:hover:not(:disabled) { background: #2a2a2a; }
+.ra-btn--google {
+  background: #fff;
+  color: #1f1f1f;
+  border-color: #747775;
+}
+.ra-btn--google:hover:not(:disabled) { background: #f2f2f2; }
 .ra-btn--discord {
-  width: 100%;
   background: var(--ra-discord);
   color: #fff;
 }
-.ra-btn--discord:hover:not(:disabled) { background: #4752c4; }
+.ra-btn--discord:hover:not(:disabled) { background: var(--discord-hover); }
 .ra-btn--primary {
   background: var(--ra-green);
   color: var(--ra-green-ink);

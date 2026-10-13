@@ -53,7 +53,7 @@ export default function Account() {
         <h2>Account details</h2>
         <dl className="ra-account-details">
           <dt>Email</dt>
-          <dd>{profile?.email ?? user?.email ?? 'Not shared by Discord'}</dd>
+          <dd>{profile?.email ?? user?.email ?? 'Not shared'}</dd>
           {memberSince && (
             <>
               <dt>Member since</dt>

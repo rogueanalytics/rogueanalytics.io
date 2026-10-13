@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider.jsx'
-import { DiscordButton } from '../components/Buttons.jsx'
+import { SignInButton } from '../components/Buttons.jsx'
 import { IconClock, IconClose, IconLock, IconSearch } from '../components/Icons.jsx'
 import Seg from '../components/Seg.jsx'
 import {
@@ -1329,7 +1329,7 @@ function SignInGate() {
           Every FBS quarterback, running back, receiver and tight end, ranked inside his position. Free with a Rogue
           Analytics account.
         </p>
-        <DiscordButton />
+        <SignInButton />
       </div>
     </>
   )

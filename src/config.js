@@ -4,6 +4,10 @@ export const MEMBERS_ENABLED = import.meta.env.VITE_MEMBERS_ENABLED === 'true'
 export const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || ''
 export const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID || ''
 
+// Show "Continue with Apple" on /sign-in. Turn on only after the Apple provider is set up in
+// Supabase (docs/auth-providers-setup.md, section 2); until then the button would just error.
+export const APPLE_SIGN_IN_ENABLED = false
+
 export const DROP_SCHEDULE = [
   { label: 'Weekday slates', time: '3:00 PM ET', when: 'day of games' },
   { label: 'Saturday slate', time: '4:00 PM ET', when: 'Friday before' },

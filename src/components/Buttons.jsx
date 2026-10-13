@@ -1,22 +1,21 @@
 import { Link, useLocation } from 'react-router-dom'
 import { MEMBERS_ENABLED } from '../config.js'
-import { useAuth } from '../auth/AuthProvider.jsx'
 import { IconArrow, IconLogin } from './Icons.jsx'
 import { track } from '../lib/track.js'
 
-export function DiscordButton({ children = 'Log in with Discord', className = '' }) {
-  const { signInWithDiscord } = useAuth()
-  const { pathname } = useLocation()
-  // Return to the page the visitor was on after Discord sign-in.
-  const onClick = () => {
-    track('sign_in_start', { from: pathname })
-    signInWithDiscord(pathname).catch((e) => console.error('Discord sign-in failed', e))
-  }
+// Sends the visitor to /sign-in (Apple, Google or Discord), then back here.
+export function SignInButton({ children = 'Sign in', className = '' }) {
+  const { pathname, search } = useLocation()
+  const next = pathname + search
   return (
-    <button type="button" className={`btn btn-disc ${className}`} onClick={onClick}>
+    <Link
+      to={`/sign-in?next=${encodeURIComponent(next)}`}
+      className={`btn btn-green ${className}`}
+      onClick={() => track('sign_in_start', { from: pathname })}
+    >
       <IconLogin size={16} />
       {children}
-    </button>
+    </Link>
   )
 }
 
@@ -29,7 +28,7 @@ export function SubscribeButton({ className = '' }) {
       </span>
     )
   }
-  return <DiscordButton className={className}>Log in with Discord to subscribe</DiscordButton>
+  return <SignInButton className={className}>Sign in to subscribe</SignInButton>
 }
 
 export function ArrowLink({ to, children, variant = 'green', className = '', onClick }) {
