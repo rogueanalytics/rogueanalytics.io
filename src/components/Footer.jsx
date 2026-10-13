@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Logo from './Logo.jsx'
 import { CONTACT_EMAIL } from '../config.js'
 
-// Privacy, Terms and social links go here once those pages and accounts exist.
+// Social links go here once those accounts exist.
 const COLUMNS = [
   {
     label: 'Products',
@@ -34,6 +34,8 @@ const COLUMNS = [
     links: [
       ['About', '/about'],
       ['Analytics consulting', '/analytics'],
+      ['Privacy Policy', '/privacy'],
+      ['Terms of Service', '/terms'],
     ],
   },
 ]

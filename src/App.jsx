@@ -10,6 +10,8 @@ import Players from './pages/Players.jsx'
 import Gamebooks from './pages/Gamebooks.jsx'
 import Analytics from './pages/Analytics.jsx'
 import About from './pages/About.jsx'
+import Privacy from './pages/Privacy.jsx'
+import Terms from './pages/Terms.jsx'
 import CollegeBasketball from './pages/CollegeBasketball.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { MEMBERS_ENABLED } from './config.js'
@@ -54,6 +56,8 @@ export default function App() {
           <Route path="college-basketball/*" element={<Navigate to="/college-basketball" replace />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="about" element={<About />} />
+          <Route path="privacy" element={<Privacy />} />
+          <Route path="terms" element={<Terms />} />
 
           {/* Accounts */}
           <Route path="sign-in" element={<SignIn />} />

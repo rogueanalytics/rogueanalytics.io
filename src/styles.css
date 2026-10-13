@@ -93,6 +93,8 @@ button, input, select, textarea { font: inherit; }
 .eb--ink { color: var(--green-ink); }
 .lede { font-size: clamp(17px, 1.6vw, 20px); line-height: 1.5; color: var(--soft); max-width: 44em; }
 .prose { display: flex; flex-direction: column; gap: 18px; font-size: 18px; line-height: 1.6; color: var(--body); max-width: 36em; }
+.legal h2 { margin-top: 18px; }
+.legal ul { margin: 0; padding-left: 1.2em; }
 .body { color: var(--body); line-height: 1.55; }
 .body-lg { font-size: 17px; line-height: 1.55; }
 .small-body { font-size: 14px; line-height: 1.5; }
