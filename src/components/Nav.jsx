@@ -4,23 +4,25 @@ import Logo from './Logo.jsx'
 import { IconChevron, IconClose, IconMenu } from './Icons.jsx'
 import AuthButton from '../auth/AuthButton.jsx'
 import { track } from '../lib/track.js'
+import { MEMBERS_ENABLED } from '../config.js'
 
-// Products menu: what you can buy (lowest price first), then the college football data pages.
-const PRODUCT_GROUPS = [
+// Products menu: one row per sport, each sport's pages ordered by cost. Hovering (or tapping) a sport opens its pages in a flyout to the side.
+const PRODUCT_SPORTS = [
   {
-    label: 'Subscriptions',
+    id: 'cfb',
+    label: 'College Football',
     items: [
-      { label: 'College Football Game Book', to: '/#products', note: 'Every game, broken down', tag: 'Coming soon' },
-      { label: 'College Football Player Projections', to: '/products/college-football', note: 'Player stat lines for every slate · $100/mo', tag: 'Live', live: true },
-      { label: 'College Basketball Player Projections', to: '/college-basketball', note: 'College basketball player projections', tag: 'Coming soon' },
+      { label: 'Teams', to: '/college-football/teams', note: 'Every FBS team, raw and opponent-adjusted' },
+      { label: 'Players', to: '/college-football/players', note: 'QB, RB, WR and TE season rankings' },
+      { label: 'Gamebooks', to: '/college-football/gamebooks', note: 'Every game, broken down', soon: !MEMBERS_ENABLED },
+      { label: 'Player Projections', to: '/college-football/projections', note: 'Player stat lines for every slate, with .csv download' },
     ],
   },
   {
-    label: 'College football data',
+    id: 'cbb',
+    label: 'College Basketball',
     items: [
-      { label: 'Team Rankings', to: '/college-football/teams', note: 'Every FBS team, raw and opponent-adjusted', tag: 'Free' },
-      { label: 'Player Board', to: '/college-football/players', note: 'QB, RB, WR and TE season rankings', tag: 'Free with sign-in' },
-      { label: 'Projection Table', to: '/college-football/projections', note: "This week's player projections and .csv download", tag: 'Subscribers' },
+      { label: 'Player Projections', to: '/college-basketball', note: 'College basketball player projections', soon: true },
     ],
   },
 ]
@@ -39,6 +41,7 @@ const FOCUSABLE = 'a[href], button:not([disabled])'
 
 export default function Nav() {
   const [productsOpen, setProductsOpen] = useState(false)
+  const [activeSport, setActiveSport] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname, hash } = useLocation()
   const headerRef = useRef(null)
@@ -50,16 +53,23 @@ export default function Nav() {
   if (pathname + hash !== lastLoc) {
     setLastLoc(pathname + hash)
     setProductsOpen(false)
+    setActiveSport(null)
     setMenuOpen(false)
+  }
+
+  // Closing the menu also folds the open flyout, so it reopens showing just the sports.
+  const closeProducts = () => {
+    setProductsOpen(false)
+    setActiveSport(null)
   }
 
   // Products dropdown: close on outside click or Escape.
   useEffect(() => {
     if (!productsOpen) return
     const onDown = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setProductsOpen(false)
+      if (menuRef.current && !menuRef.current.contains(e.target)) closeProducts()
     }
-    const onKey = (e) => e.key === 'Escape' && setProductsOpen(false)
+    const onKey = (e) => e.key === 'Escape' && closeProducts()
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
@@ -121,34 +131,52 @@ export default function Nav() {
             className="dd"
             ref={menuRef}
             onMouseEnter={() => canHover() && setProductsOpen(true)}
-            onMouseLeave={() => canHover() && setProductsOpen(false)}
+            onMouseLeave={() => canHover() && closeProducts()}
           >
             <button
               type="button"
               className={`nav-a${productsActive ? ' active' : ''}`}
               aria-expanded={productsOpen}
               aria-controls="products-menu"
-              onClick={() => setProductsOpen((o) => (canHover() ? true : !o))}
+              onClick={() => (canHover() || !productsOpen ? setProductsOpen(true) : closeProducts())}
             >
               Products
               <IconChevron size={14} />
             </button>
             {productsOpen && (
-              <div className="dd-menu dd-menu--wide" id="products-menu">
-                {PRODUCT_GROUPS.map((g) => (
-                  <div className="dd-group" key={g.label}>
-                    <span className="dd-label">{g.label}</span>
-                    {g.items.map((it) => (
-                      <Link className="dd-item" key={it.label} to={it.to}>
-                        <span className="dd-item-name">
-                          {it.label}
-                          <span className={`dd-tag${it.live ? ' dd-tag--live' : ''}`}>{it.tag}</span>
-                        </span>
-                        <span className="dd-item-note">{it.note}</span>
-                      </Link>
-                    ))}
-                  </div>
-                ))}
+              <div className="dd-menu dd-fly" id="products-menu">
+                {PRODUCT_SPORTS.map((sp) => {
+                  const open = activeSport === sp.id
+                  return (
+                    <div className="dd-sport" key={sp.id} onMouseEnter={() => canHover() && setActiveSport(sp.id)}>
+                      <button
+                        type="button"
+                        className={`dd-sport-btn${open ? ' open' : ''}`}
+                        aria-expanded={open}
+                        aria-controls={`products-${sp.id}`}
+                        onClick={() => setActiveSport((cur) => (canHover() || cur !== sp.id ? sp.id : null))}
+                        onFocus={() => canHover() && setActiveSport(sp.id)}
+                      >
+                        {sp.label}
+                        <IconChevron size={14} />
+                      </button>
+                      {open && (
+                        <div className="dd-panel" id={`products-${sp.id}`}>
+                          <span className="dd-label">{sp.label}</span>
+                          {sp.items.map((it) => (
+                            <Link className="dd-item" key={it.label} to={it.to}>
+                              <span className="dd-item-name">
+                                {it.label}
+                                {it.soon && <span className="dd-tag">Coming soon</span>}
+                              </span>
+                              <span className="dd-item-note">{it.note}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
