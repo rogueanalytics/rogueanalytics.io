@@ -24,6 +24,8 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
   const [accountLoading, setAccountLoading] = useState(false);
+  // Which user the profile and subscriptions were last loaded for.
+  const [loadedUserId, setLoadedUserId] = useState(null);
   const [accountError, setAccountError] = useState(null);
 
   // 1. Track the auth session.
@@ -66,6 +68,7 @@ export function AuthProvider({ children }) {
     }
     setProfile(profileRes.data ?? null);
     setSubscriptions(subsRes.data ?? []);
+    setLoadedUserId(userId);
     setAccountLoading(false);
   }, [userId]);
 
@@ -73,6 +76,7 @@ export function AuthProvider({ children }) {
     if (!userId) {
       setProfile(null);
       setSubscriptions([]);
+      setLoadedUserId(null);
       return;
     }
     refreshAccount();
@@ -119,7 +123,9 @@ export function AuthProvider({ children }) {
     subscriptions,
     activeTiers,
     hasTier: (tier) => activeTiers.has(tier),
-    accountLoading,
+    // Still loading until this user's account has been fetched, so pages never see
+    // a signed-in user with an empty subscription list in between.
+    accountLoading: accountLoading || (!!userId && loadedUserId !== userId),
     accountError,
     refreshAccount,
     signInWithProvider,
