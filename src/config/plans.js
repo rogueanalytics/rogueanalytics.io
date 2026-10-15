@@ -7,7 +7,7 @@ export const PLANS = [
     price: 100,
     description: 'College football player projections for every slate, downloadable as .csv in the Unabated Simulator format. Includes every Game Book.',
     includes: ['player_projections', 'gamebooks'],
-    whopCheckoutUrl: null,
+    whopCheckoutUrl: 'https://rogueanalytics.buildr.bet/checkout/53d778a1-e6da-42fe-96a6-9f1d2912b577',
   },
   {
     // Name is "Game Book" on the site; the tier id stays 'gamebooks' to match the database.
@@ -16,7 +16,7 @@ export const PLANS = [
     price: 25,
     description: 'A breakdown of every college football game on the slate, read on the site.',
     includes: ['gamebooks'],
-    whopCheckoutUrl: null,
+    whopCheckoutUrl: 'https://rogueanalytics.buildr.bet/checkout/10d453cc-4517-416c-bd1c-5698176028d3',
   },
 ];
 
