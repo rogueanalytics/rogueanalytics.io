@@ -28,6 +28,12 @@ export const teamPath = (name) => `/college-football/teams/${teamSlug(name)}`
 
 const ESPN_IDS = Object.fromEntries(Object.entries(espnTeamIds).map(([name, id]) => [normName(name), id]))
 
+// A team's logo for dark backgrounds, resized by ESPN's image server (every FBS team has one).
+export const teamLogo = (name, size = 64) => {
+  const id = ESPN_IDS[normName(name)]
+  return id ? `https://a.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500-dark/${id}.png&h=${size}&w=${size}` : null
+}
+
 const getJson = (url) =>
   fetch(url).then((r) => {
     if (!r.ok) throw new Error(`${url} ${r.status}`)
@@ -130,4 +136,110 @@ export function useEspnTeam(name, season) {
   if (!result || result.key !== key) return { status: 'loading' }
   if (result.error) return { status: 'error' }
   return { status: 'ready', ...result.data }
+}
+
+// ---------------------------------------------------------------------
+// Passing by zone, charted from ESPN's play-by-play text ("pass complete short right to …").
+// ESPN writes short/deep and left/middle/right on most throws; sacks, and some interceptions
+// and touchdowns, carry no direction and stay uncharted.
+// ---------------------------------------------------------------------
+
+export const ZONES = ['deep-left', 'deep-middle', 'deep-right', 'short-left', 'short-middle', 'short-right']
+
+const ZONE_RE = /\b(short|deep) (left|middle|right)\b/i
+const isPassPlay = (type, text) =>
+  /pass|intercept/i.test(type) && !/two.?point|conversion/i.test(type) && !/no play/i.test(text)
+
+// Success, as usual: 50% of the yards needed on 1st down, 70% on 2nd, all of them on 3rd/4th.
+const successful = (down, distance, gained, td) => {
+  if (td) return true
+  if (!down || distance == null) return gained > 0
+  const need = down === 1 ? 0.5 : down === 2 ? 0.7 : 1
+  return gained >= need * distance
+}
+
+// Every pass play in one game: { off (ESPN team id), zone | null, complete, int, td, yards, success }.
+const gamePasses = new Map()
+function loadGamePasses(eventId) {
+  if (!gamePasses.has(eventId)) {
+    const p = getJson(`${ESPN}/summary?event=${eventId}`)
+      .then((j) =>
+        (j.drives?.previous ?? []).flatMap((d) =>
+          (d.plays ?? [])
+            .filter((p) => isPassPlay(p.type?.text ?? '', p.text ?? ''))
+            .map((p) => {
+              const type = p.type?.text ?? ''
+              const text = p.text ?? ''
+              const z = text.match(ZONE_RE)
+              const int = /intercept/i.test(type) || /intercepted/i.test(text)
+              const td = type === 'Passing Touchdown'
+              const complete = !int && (td || /pass complete/i.test(text) || type === 'Pass Reception')
+              const yards = complete ? (p.statYardage ?? 0) : 0
+              return {
+                off: p.start?.team?.id ?? d.team?.id ?? null,
+                zone: z ? `${z[1]}-${z[2]}`.toLowerCase() : null,
+                complete,
+                int,
+                td,
+                yards,
+                success: !int && successful(p.start?.down, p.start?.distance, yards, td),
+              }
+            }),
+        ),
+      )
+      .catch((e) => {
+        gamePasses.delete(eventId) // let a later visit try again
+        throw e
+      })
+    gamePasses.set(eventId, p)
+  }
+  return gamePasses.get(eventId)
+}
+
+const emptyZone = () => ({ att: 0, cmp: 0, yds: 0, td: 0, int: 0, succ: 0 })
+function tally(plays) {
+  const zones = Object.fromEntries(ZONES.map((z) => [z, emptyZone()]))
+  for (const p of plays) {
+    if (!p.zone) continue
+    const z = zones[p.zone]
+    z.att++
+    z.cmp += p.complete ? 1 : 0
+    z.yds += p.yards
+    z.td += p.td ? 1 : 0
+    z.int += p.int ? 1 : 0
+    z.succ += p.success ? 1 : 0
+  }
+  return { total: plays.length, charted: plays.filter((p) => p.zone).length, zones }
+}
+
+// Throws by zone in a team's completed games: `off` = its own, `def` = its opponents'.
+// Pass `enabled` false to skip the fetch (each game's play-by-play is ~0.5 MB).
+// status: 'idle' | 'loading' | 'error' | 'ready'
+export function usePassZones(teamId, eventIds, enabled) {
+  const key = enabled && teamId && eventIds.length ? `${teamId}:${eventIds.join(',')}` : null
+  const [result, setResult] = useState(null)
+
+  useEffect(() => {
+    if (!key) return
+    let cancelled = false
+    Promise.all(key.split(':')[1].split(',').map(loadGamePasses)).then(
+      (games) => {
+        if (cancelled) return
+        const plays = games.flat()
+        setResult({ key, off: tally(plays.filter((p) => p.off === teamId)), def: tally(plays.filter((p) => p.off !== teamId)) })
+      },
+      (error) => {
+        console.error('Failed to load play-by-play', error)
+        if (!cancelled) setResult({ key, error: true })
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [key, teamId])
+
+  if (!key) return { status: 'idle' }
+  if (!result || result.key !== key) return { status: 'loading' }
+  if (result.error) return { status: 'error' }
+  return { status: 'ready', off: result.off, def: result.def, games: eventIds.length }
 }

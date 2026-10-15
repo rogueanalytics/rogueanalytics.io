@@ -4,14 +4,20 @@ import { IconClock } from '../components/Icons.jsx'
 import Seg from '../components/Seg.jsx'
 import { useTeamStatsMeta, useTeamStatsRows } from '../lib/data.js'
 import { formatStat, rankTeams, rankTone } from '../lib/rank.js'
-import { normName, teamPath, teamSlug, useEspnTeam } from '../lib/teams.js'
+import { ZONES, normName, teamLogo, teamPath, teamSlug, useEspnTeam, usePassZones } from '../lib/teams.js'
 import '../styles/team.css'
 
 // One team's profile: ESPN for the logo, record and schedule; the team_stats tables
 // (CFB Command Center) for everything measured. Sections without a data source yet
 // (power rating, players, depth chart, drives) are left out — see docs/team-profile-data.md.
 
-const TABLES = { basic: 'team_stats_basic', advanced: 'team_stats_advanced', adjusted: 'team_stats_adjusted' }
+const TABLES = {
+  basic: 'team_stats_basic',
+  advanced: 'team_stats_advanced',
+  adjusted: 'team_stats_adjusted',
+  composite: 'team_stats_composite',
+}
+const FACTORS = ['efficiency', 'field_position', 'finishing', 'explosiveness', 'turnovers']
 
 const TABS = [
   ['overview', 'Overview'],
@@ -250,19 +256,19 @@ function Hero({ row, espn, stat, season, nextGame, nextFbs }) {
         </div>
 
         <div className="tp-tiles">
-          {tile('Offense', stat('advanced', 'off_epa'), 'EPA a play')}
-          {tile('Defense', stat('advanced', 'def_epa'), 'EPA a play allowed')}
+          {tile('Offense', stat('advanced', 'off_epa'), 'EPA per play')}
+          {tile('Defense', stat('advanced', 'def_epa'), 'EPA per play allowed')}
           {team?.pointsFor != null ? (
             <div className="tp-tile">
               <span className="tool-label">Scoring</span>
               <span className="tp-tile-v">{team.pointsFor.toFixed(1)}</span>
-              <span className="tp-tile-s">points a game · allows {team.pointsAgainst?.toFixed(1)}</span>
+              <span className="tp-tile-s">points per game · allows {team.pointsAgainst?.toFixed(1)}</span>
             </div>
           ) : (
             tile('Success rate', stat('advanced', 'off_success_rate'), 'of plays succeed')
           )}
-          {tile('Yards a play', stat('basic', 'yards_per_play'), 'yards a play')}
-          {tile('Turnover margin', stat('basic', 'turnover_margin'), 'a game')}
+          {tile('Yards per play', stat('basic', 'yards_per_play'), 'yards per play')}
+          {tile('Turnover margin', stat('basic', 'turnover_margin'), 'per game')}
           {tile('Havoc', stat('advanced', 'def_havoc'), 'of snaps on defense')}
 
           {nextGame && (
@@ -288,7 +294,7 @@ function Hero({ row, espn, stat, season, nextGame, nextFbs }) {
   )
 }
 
-// Offense vs their defense, and the other way round, on EPA a play.
+// Offense vs their defense, and the other way round, on EPA per play.
 function Matchup({ us, them, stat }) {
   const o = stat('advanced', 'off_epa')
   const d = stat('advanced', 'def_epa')
@@ -302,7 +308,7 @@ function Matchup({ us, them, stat }) {
   )
   return (
     <div className="tp-mu">
-      <span className="tool-label">EPA a play, ranked</span>
+      <span className="tool-label">EPA per play, ranked</span>
       <span>
         <span className="tp-mu-k">Our O vs their D</span> {line(o.ranks[us], d.ranks[them])}
       </span>
@@ -476,6 +482,43 @@ function ScheduleTable({ games, fbsOf }) {
 // Fingerprint, scatter, situations, notes
 // ---------------------------------------------------------------------
 
+// The five-factor composite: a ranking of how this team has played so far, not a projection.
+// Shown only once team_stats_composite is published; a team under three games has no scores.
+function Composite({ tables, stat, team }) {
+  const t = tables.composite
+  if (!t) return null
+  const total = stat('composite', 'composite')
+  const weights = t.columns.find((c) => c.key === 'composite')?.weights ?? {}
+  const scored = total?.valueOf(team) != null
+  return (
+    <Panel
+      title="Team composite"
+      sub="A ranking, not a projection: how this team has played so far this season, not a prediction of future games. Each factor is a 0-100 score, the average of its stats' percentiles among FBS teams."
+    >
+      {!scored ? (
+        <p className="tp-sub">Not scored yet: teams need three games before the composite ranks them.</p>
+      ) : (
+        <>
+          <StatRow s={total} team={team} />
+          <div className="tp-fp-group">Factors (weight)</div>
+          {FACTORS.map((k) => {
+            const s = stat('composite', k)
+            return (
+              s && (
+                <StatRow
+                  key={k}
+                  s={{ ...s, label: weights[k] != null ? `${s.label} (${Math.round(weights[k] * 100)}%)` : s.label }}
+                  team={team}
+                />
+              )
+            )
+          })}
+        </>
+      )}
+    </Panel>
+  )
+}
+
 function Fingerprint({ stat, team }) {
   const [mode, setMode] = useState('raw')
   return (
@@ -509,7 +552,7 @@ function Fingerprint({ stat, team }) {
 }
 
 const SCATTER = {
-  epa: { x: 'off_epa', y: 'def_epa', label: 'EPA a play' },
+  epa: { x: 'off_epa', y: 'def_epa', label: 'EPA per play' },
   success: { x: 'off_success_rate', y: 'def_success_rate', label: 'success rate' },
 }
 
@@ -538,13 +581,27 @@ function Scatter({ stat, rows, row, highlight }) {
   const dot = (r) => [X(Number(xs.valueOf(r.team))), Y(Number(ys.valueOf(r.team)))]
   const go = (r) => navigate(teamPath(r.team))
   const label = (r) => `${r.team}: offense ${show(xs, xs.valueOf(r.team))} (#${xs.ranks[r.team]}), defense ${show(ys, ys.valueOf(r.team))} (#${ys.ranks[r.team]})`
-  const others = pts.filter((r) => r.team !== row.team)
-  const named = others.filter((r) => highlight.includes(r.team))
+  // Conference teams are drawn after (on top of) everyone else.
+  const inConf = (r) => !!r.conference && r.conference === row.conference
+  const others = pts
+    .filter((r) => r.team !== row.team && !highlight.includes(r.team))
+    .sort((a, b) => inConf(a) - inConf(b))
+  const named = pts.filter((r) => r.team !== row.team && highlight.includes(r.team))
+  // A team's logo centred on its point, or a dot if ESPN has none.
+  const mark = (r, size, className) => {
+    const [cx, cy] = dot(r)
+    const href = teamLogo(r.team, size > 30 ? 96 : 48)
+    return href ? (
+      <image href={href} x={cx - size / 2} y={cy - size / 2} width={size} height={size} className={className} />
+    ) : (
+      <circle cx={cx} cy={cy} r={size / 5} className={className} />
+    )
+  }
 
   return (
     <Panel
       title="Where they live"
-      sub={`Offense against defense, ${SCATTER[mode].label}, every FBS team. ${row.conference ?? 'Conference'} teams outlined. Click a dot to open that team.`}
+      sub={`Offense against defense, ${SCATTER[mode].label}, every FBS team. ${row.conference ?? 'Conference'} teams a shade brighter. Click a logo to open that team.`}
       tools={
         <Seg
           label="Measure"
@@ -566,21 +623,21 @@ function Scatter({ stat, rows, row, highlight }) {
         <text x={L + 4} y={pad + 14} className="tp-sc-q">DEFENSE CARRIES</text>
         <text x={W - pad - 4} y={H - B - 8} textAnchor="end" className="tp-sc-q">OFFENSE CARRIES</text>
         <text x={L + 4} y={H - B - 8} className="tp-sc-q">STRUGGLING</text>
-        {others.map((r) => {
-          const [cx, cy] = dot(r)
-          const conf = r.conference && r.conference === row.conference
-          return (
-            <circle key={r.team} cx={cx} cy={cy} r={conf ? 4.5 : 3.5} className={conf ? 'tp-sc-conf' : 'tp-sc-dot'} onClick={() => go(r)}>
-              <title>{label(r)}</title>
-            </circle>
-          )
-        })}
+        {others.map((r) => (
+          <g key={r.team} className={`tp-sc-team${inConf(r) ? ' conf' : ''}`} onClick={() => go(r)}>
+            <title>{label(r)}</title>
+            {mark(r, inConf(r) ? 22 : 20)}
+          </g>
+        ))}
         {named.map((r) => {
           const [cx, cy] = dot(r)
           return (
-            <g key={r.team} onClick={() => go(r)} className="tp-sc-named">
-              <circle cx={cx} cy={cy} r="5.5" />
-              <text x={cx + 9} y={cy + 4}>{r.team}</text>
+            <g key={r.team} className="tp-sc-team named" onClick={() => go(r)}>
+              <title>{label(r)}</title>
+              {mark(r, 26)}
+              <text x={cx + 16} y={cy + 4}>
+                {r.team}
+              </text>
             </g>
           )
         })}
@@ -589,9 +646,10 @@ function Scatter({ stat, rows, row, highlight }) {
           const left = cx > W / 2
           return (
             <g className="tp-sc-me">
-              <circle cx={cx} cy={cy} r="15" className="tp-sc-halo" />
-              <circle cx={cx} cy={cy} r="7.5" className="tp-sc-core" />
-              <text x={left ? cx - 13 : cx + 13} y={cy - 12} textAnchor={left ? 'end' : 'start'}>
+              <title>{label(row)}</title>
+              <circle cx={cx} cy={cy} r="24" className="tp-sc-halo" />
+              {mark(row, 40)}
+              <text x={left ? cx - 26 : cx + 26} y={cy - 16} textAnchor={left ? 'end' : 'start'}>
                 {row.team.toUpperCase()}
               </text>
             </g>
@@ -621,7 +679,7 @@ function Situations({ stat, team }) {
   const cols = [
     ['Share', 'rate'],
     ['Success rate', 'success_rate'],
-    ['EPA a play', 'epa'],
+    ['EPA per play', 'epa'],
     ['Explosiveness', 'explosiveness'],
   ]
   return (
@@ -712,7 +770,7 @@ function Notes({ stat, team, next, nextFbs }) {
         kind: 'mu',
         icon: '⇄',
         title: `Next: ${next.opp.name}`,
-        text: `Our offense #${o.ranks[team]} meets their defense #${d.ranks[nextFbs.team]} (${edge(o.ranks[team], d.ranks[nextFbs.team])}); our defense #${d.ranks[team]} meets their offense #${o.ranks[nextFbs.team]} (${edge(d.ranks[team], o.ranks[nextFbs.team])}). EPA a play.`,
+        text: `Our offense #${o.ranks[team]} meets their defense #${d.ranks[nextFbs.team]} (${edge(o.ranks[team], d.ranks[nextFbs.team])}); our defense #${d.ranks[team]} meets their offense #${o.ranks[nextFbs.team]} (${edge(d.ranks[team], o.ranks[nextFbs.team])}). EPA per play.`,
       })
     }
   }
@@ -728,6 +786,141 @@ function Notes({ stat, team, next, nextFbs }) {
             </div>
           </div>
         ))}
+      </div>
+    </Panel>
+  )
+}
+
+// Passing by zone, charted from ESPN's play-by-play. side 'off' = this team's throws,
+// 'def' = throws against it. Colour = each zone's success rate against the FBS pass success
+// rate (flipped on defense, where a low rate allowed is good).
+const ZONE_NAME = { left: 'Left', middle: 'Middle', right: 'Right' }
+const MIN_ATT = 5
+
+function PassZones({ side, q, baseline }) {
+  const offense = side === 'off'
+  const title = offense ? 'Passing by zone' : 'Passing against, by zone'
+  const sub = offense
+    ? 'Every throw ESPN’s play-by-play charts, by depth and side of the field.'
+    : 'Every throw opponents made against this defense, by depth and side of the field.'
+  if (q.status === 'loading')
+    return (
+      <Panel title={title} sub={sub}>
+        <div className="rk-loading" style={{ padding: 0 }} aria-busy="true">
+          <span className="skel" style={{ width: '60%' }} />
+          <span className="skel" style={{ width: '40%' }} />
+        </div>
+      </Panel>
+    )
+  if (q.status === 'error')
+    return (
+      <Panel title={title} sub={sub}>
+        <p className="tp-sub">ESPN’s play-by-play didn’t load. The stats below are unaffected.</p>
+      </Panel>
+    )
+  if (q.status !== 'ready') return null
+
+  const data = q[side]
+  const { zones, charted, total } = data
+  if (charted === 0)
+    return (
+      <Panel title={title} sub={sub}>
+        <p className="tp-sub">No charted throws yet.</p>
+      </Panel>
+    )
+
+  const rate = (z) => (z.att ? z.succ / z.att : null)
+  // Above the baseline is good on offense, bad on defense.
+  const edge = (z) => (rate(z) == null || baseline == null ? 0 : (rate(z) - baseline) * (offense ? 1 : -1))
+  const fill = (z) => {
+    if (z.att < MIN_ATT) return 'var(--tp-card)'
+    const e = Math.max(-1, Math.min(1, edge(z) / 0.2))
+    return e >= 0 ? `rgba(113, 187, 54, ${0.1 + e * 0.32})` : `rgba(239, 106, 91, ${0.1 - e * 0.32})`
+  }
+  const pct = (n) => `${Math.round(n * 100)}%`
+  const label = (key) => {
+    const [depth, dir] = key.split('-')
+    return `${depth} ${ZONE_NAME[dir].toLowerCase()}`
+  }
+
+  const list = ZONES.map((key) => ({ key, ...zones[key] }))
+  const enough = list.filter((z) => z.att >= MIN_ATT)
+  const most = [...list].sort((a, b) => b.att - a.att)[0]
+  const best = [...enough].sort((a, b) => edge(b) - edge(a))[0]
+  const worst = [...enough].sort((a, b) => edge(a) - edge(b))[0]
+  const deep = list.filter((z) => z.key.startsWith('deep')).reduce((n, z) => n + z.att, 0)
+  const all = list.reduce(
+    (a, z) => ({ att: a.att + z.att, cmp: a.cmp + z.cmp, yds: a.yds + z.yds, succ: a.succ + z.succ }),
+    { att: 0, cmp: 0, yds: 0, succ: 0 },
+  )
+  const who = offense ? 'They' : 'Opponents'
+
+  return (
+    <Panel
+      title={title}
+      sub={`${sub} Colour compares each zone’s success rate with the FBS pass success rate${
+        baseline != null ? ` (${pct(baseline)})` : ''
+      }; zones under ${MIN_ATT} throws stay grey.`}
+    >
+      <div className="tp-pz">
+        <div className="tp-pz-field">
+          <span className="tp-pz-depth">Deep</span>
+          <span className="tp-pz-depth tp-pz-depth--short">Short</span>
+          <div className="tp-pz-grid">
+            {list.map((z) => (
+              <div key={z.key} className={`tp-pz-cell${z.att < MIN_ATT ? ' thin' : ''}`} style={{ background: fill(z) }}>
+                <span className="tp-pz-name">{label(z.key)}</span>
+                <span className="tp-pz-big">{z.att ? pct(rate(z)) : '—'}</span>
+                <span className="tp-pz-k">success</span>
+                <span className="tp-pz-line">
+                  {z.att} att · {pct(z.att / charted)} of throws
+                </span>
+                <span className="tp-pz-line">
+                  {z.att ? `${pct(z.cmp / z.att)} cmp · ${(z.yds / z.att).toFixed(1)} yds/att` : ' '}
+                </span>
+                <span className="tp-pz-line">{z.td ? `${z.td} TD` : ' '}</span>
+              </div>
+            ))}
+          </div>
+          <div className="tp-pz-los">
+            <span>← left</span>
+            <span>line of scrimmage</span>
+            <span>right →</span>
+          </div>
+        </div>
+
+        <div className="tp-pz-read">
+          <div className="tp-pz-stat">
+            <span className="tool-label">Charted throws</span>
+            <span className="tp-tile-v">{all.att}</span>
+            <span className="tp-tile-s">
+              {pct(all.cmp / all.att)} complete · {(all.yds / all.att).toFixed(1)} yds/att · {pct(all.succ / all.att)} success
+            </span>
+          </div>
+          <ul className="tp-pz-notes">
+            <li>
+              {who} throw <b>{label(most.key)}</b> most: {pct(most.att / charted)} of throws.
+            </li>
+            <li>
+              <b>{pct(deep / charted)}</b> of throws go deep.
+            </li>
+            {best && (
+              <li>
+                {offense ? 'Best' : 'Toughest to throw on'}: <b>{label(best.key)}</b>, {pct(rate(best))} success on {best.att}.
+              </li>
+            )}
+            {worst && worst !== best && (
+              <li>
+                {offense ? 'Least productive' : 'Most exposed'}: <b>{label(worst.key)}</b>, {pct(rate(worst))} success on{' '}
+                {worst.att}.
+              </li>
+            )}
+          </ul>
+          <p className="tp-pz-foot">
+            {charted} of {total} pass plays in {q.games} games carry a zone; interceptions and some touchdowns are
+            logged without one. Sacks aren’t counted. All plays count, garbage time included.
+          </p>
+        </div>
       </div>
     </Panel>
   )
@@ -785,6 +978,7 @@ export default function TeamProfile() {
   const basicQ = useTeamStatsRows(metaOf('basic') ? TABLES.basic : null, season)
   const advQ = useTeamStatsRows(metaOf('advanced') ? TABLES.advanced : null, season)
   const adjQ = useTeamStatsRows(metaOf('adjusted') ? TABLES.adjusted : null, season)
+  const compQ = useTeamStatsRows(metaOf('composite') ? TABLES.composite : null, season)
 
   const tables = useMemo(() => {
     const out = {}
@@ -792,6 +986,7 @@ export default function TeamProfile() {
       ['basic', basicQ],
       ['advanced', advQ],
       ['adjusted', adjQ],
+      ['composite', compQ],
     ]) {
       const meta = metaQ.status === 'ready' ? metaQ.byTable[TABLES[id]] : null
       if (q.status !== 'ready' || !meta) continue
@@ -803,7 +998,7 @@ export default function TeamProfile() {
       }
     }
     return out
-  }, [metaQ, basicQ, advQ, adjQ])
+  }, [metaQ, basicQ, advQ, adjQ, compQ])
   const stat = useMemo(() => makeStats(tables), [tables])
 
   const rows = useMemo(() => tables.advanced?.rows ?? tables.basic?.rows ?? [], [tables])
@@ -815,6 +1010,16 @@ export default function TeamProfile() {
   const games = espn.status === 'ready' ? espn.games : []
   const nextGame = games.find((g) => !g.completed) ?? null
   const nextFbs = nextGame ? fbsOf(nextGame) : null
+  const playedIds = games.filter((g) => g.completed).map((g) => g.id)
+  const zonesQ = usePassZones(
+    espn.status === 'ready' ? espn.team.id : null,
+    playedIds,
+    tab === 'offense' || tab === 'defense',
+  )
+  const passBaseline = useMemo(() => {
+    const s = stat('advanced', 'off_pass_success_rate')
+    return s && s.values.length ? s.values.reduce((a, v) => a + v, 0) / s.values.length : null
+  }, [stat])
 
   const loading =
     metaQ.status === 'loading' ||
@@ -904,6 +1109,7 @@ export default function TeamProfile() {
         {tab === 'overview' && (
           <>
             {scheduleNote ?? (games.length > 0 && <SeasonStrip games={games} fbsOf={fbsOf} stat={stat} team={t} />)}
+            <Composite tables={tables} stat={stat} team={t} />
             <div className="tp-grid tp-grid--2">
               <Fingerprint stat={stat} team={t} />
               <Scatter stat={stat} rows={rows} row={row} highlight={highlight} />
@@ -915,8 +1121,18 @@ export default function TeamProfile() {
           </>
         )}
         {tab === 'schedule' && (scheduleNote ?? <ScheduleTable games={games} fbsOf={fbsOf} />)}
-        {tab === 'offense' && <Breakdown tables={tables} stat={stat} team={t} groups={['Offense']} />}
-        {tab === 'defense' && <Breakdown tables={tables} stat={stat} team={t} groups={['Defense']} />}
+        {tab === 'offense' && (
+          <>
+            <PassZones side="off" q={zonesQ} baseline={passBaseline} />
+            <Breakdown tables={tables} stat={stat} team={t} groups={['Offense']} />
+          </>
+        )}
+        {tab === 'defense' && (
+          <>
+            <PassZones side="def" q={zonesQ} baseline={passBaseline} />
+            <Breakdown tables={tables} stat={stat} team={t} groups={['Defense']} />
+          </>
+        )}
         {tab === 'more' && (
           <Breakdown tables={tables} stat={stat} team={t} groups={['Turnovers', 'Special teams', 'Penalties', 'General']} />
         )}

@@ -9,6 +9,7 @@ import { teamPath } from '../lib/teams.js'
 // Every FBS team, ranked. The data is published by the CFB Command Center; columns,
 // labels, groups and formats all come from team_stats_meta.columns.
 const VIEWS = [
+  { id: 'composite', label: 'Composite', table: 'team_stats_composite' },
   { id: 'basic', label: 'Stats', table: 'team_stats_basic' },
   { id: 'advanced', label: 'Advanced', table: 'team_stats_advanced' },
   { id: 'adjusted', label: 'Opponent-adjusted', table: 'team_stats_adjusted' },
@@ -75,7 +76,7 @@ function useFitToScreen() {
   return ref
 }
 
-function RankTable({ view, meta, rows, group, perGame }) {
+function RankTable({ view, meta, rows, group, perGame, record }) {
   const boxRef = useFitToScreen()
   // { key, dir }: dir 1 = #1 at the top, -1 = last at the top. Reset when the view or group changes.
   const [sort, setSort] = useState(null)
@@ -127,6 +128,11 @@ function RankTable({ view, meta, rows, group, perGame }) {
             <th scope="col" className="num">
               G
             </th>
+            {record && (
+              <th scope="col" className="num">
+                W-L
+              </th>
+            )}
             {cols.map((c) => (
               <th key={c.key} scope="col" className={`num${by.key === c.key ? ' on' : ''}`}>
                 <button
@@ -145,7 +151,7 @@ function RankTable({ view, meta, rows, group, perGame }) {
         <tbody>
           {ordered.length === 0 && (
             <tr>
-              <td className="rk-none" colSpan={cols.length + 3}>
+              <td className="rk-none" colSpan={cols.length + (record ? 4 : 3)}>
                 No teams match your filters.
               </td>
             </tr>
@@ -162,6 +168,7 @@ function RankTable({ view, meta, rows, group, perGame }) {
                   {r.conference && <span className="rk-conf">{r.conference}</span>}
                 </td>
                 <td className="num">{r.games ?? '—'}</td>
+                {record && <td className="num">{r.wins != null ? `${r.wins}-${r.losses}` : '—'}</td>}
                 {cols.map((c) => (
                   <td key={c.key} className={`num${by.key === c.key ? ' on' : ''}`}>
                     {formatStat(r[showKey(c)], c.format, perGame && !!c.per_game_key)}
@@ -178,15 +185,23 @@ function RankTable({ view, meta, rows, group, perGame }) {
 
 export default function Teams() {
   const [params, setParams] = useSearchParams()
-  const view = VIEWS.find((v) => v.id === params.get('view')) ?? VIEWS[0]
+  const metaQ = useTeamStatsMeta()
+  // The composite is the default view once it is published; until then, the stats table.
+  const views = metaQ.status === 'ready' && !metaQ.byTable[VIEWS[0].table] ? VIEWS.slice(1) : VIEWS
+  const view = views.find((v) => v.id === params.get('view')) ?? views[0]
+  const isComposite = view.id === 'composite'
   const [groupPick, setGroupPick] = useState(null)
   const [conf, setConf] = useState('')
   const [q, setQ] = useState('')
   const [perGame, setPerGame] = useState(true)
 
-  const metaQ = useTeamStatsMeta()
   const meta = metaQ.status === 'ready' ? metaQ.byTable[view.table] : null
-  const columns = useMemo(() => (Array.isArray(meta?.columns) ? meta.columns : []), [meta])
+  // The composite's W-L is its own column, not a stat group.
+  const columns = useMemo(
+    () => (Array.isArray(meta?.columns) ? meta.columns : []).filter((c) => c.group !== 'Record'),
+    [meta],
+  )
+  const weights = isComposite ? columns.find((c) => c.key === 'composite')?.weights : null
   const groups = useMemo(() => [...new Set(columns.map((c) => c.group))], [columns])
   const group = groups.includes(groupPick) ? groupPick : groups[0]
 
@@ -204,7 +219,7 @@ export default function Teams() {
 
   const setView = (id) => {
     const next = new URLSearchParams(params)
-    if (id === VIEWS[0].id) next.delete('view')
+    if (id === views[0].id) next.delete('view')
     else next.set('view', id)
     setParams(next, { replace: true })
     setGroupPick(null)
@@ -214,7 +229,7 @@ export default function Teams() {
     ? [
         `${meta.team_count} FBS teams`,
         meta.through_week != null && `season to date through week ${meta.through_week}`,
-        meta.garbage_time_excluded ? 'garbage time excluded' : 'garbage time included',
+        !isComposite && (meta.garbage_time_excluded ? 'garbage time excluded' : 'garbage time included'),
         view.id === 'adjusted' && 'this season only',
       ]
         .filter(Boolean)
@@ -236,8 +251,24 @@ export default function Teams() {
   else
     body = (
       <div className="panel">
+        {isComposite && (
+          <div className="rk-note">
+            {/* A ranking of how teams have played to date, never a projection: say so where it is shown. */}
+            <strong>A ranking, not a projection.</strong> The composite ranks how each team has played so
+            far this season; it does not predict future games. Each factor is a 0-100 score, the average of its stats' percentiles among FBS teams; the
+            composite weights them
+            {weights &&
+              ` ${columns
+                .filter((c) => c.key in weights)
+                .map((c) => `${c.label.toLowerCase()} ${Math.round(weights[c.key] * 100)}%`)
+                .join(', ')}`}
+            . Teams with fewer than three games are not scored.
+          </div>
+        )}
         <div className="rk-bar">
-          <Seg label="Stat group" options={groups.map((g) => [g, g])} value={group} onChange={setGroupPick} small />
+          {groups.length > 1 && (
+            <Seg label="Stat group" options={groups.map((g) => [g, g])} value={group} onChange={setGroupPick} small />
+          )}
           {hasPerGame && (
             <Seg
               label="Values"
@@ -261,6 +292,7 @@ export default function Teams() {
           rows={{ all, shown }}
           group={group}
           perGame={hasPerGame && perGame}
+          record={isComposite}
         />
         <p className="table-foot rk-foot">
           <span>
@@ -291,7 +323,7 @@ export default function Teams() {
         <div className="panel toolbar">
           <div className="tool">
             <span className="tool-label">View</span>
-            <Seg label="View" options={VIEWS.map((v) => [v.id, v.label])} value={view.id} onChange={setView} />
+            <Seg label="View" options={views.map((v) => [v.id, v.label])} value={view.id} onChange={setView} />
           </div>
           <div className="tool">
             <label htmlFor="team-conf">Conference</label>

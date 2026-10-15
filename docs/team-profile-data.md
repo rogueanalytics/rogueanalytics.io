@@ -168,3 +168,22 @@ primary key (season, team, room)
 3. `team_drive_outcomes`: one endpoint, a simple group-by.
 4. `player_season`: unlocks key players and the player pages.
 5. `team_down_splits` and `team_position_rooms`: these need play-by-play and player work first.
+
+## Passing by zone (live, from ESPN; FBS ranks need the Command Center)
+
+The Offense and Defense tabs chart every throw by zone (short/deep × left/middle/right) from
+ESPN's play-by-play text ("pass complete short right to …"). The browser fetches
+`site.api.espn.com/.../summary?event={id}` for each completed game (about 0.5 MB each). Colour
+compares each zone with the overall FBS pass success rate, because there is no FBS figure for
+each zone.
+
+To rank zones against every FBS team, the Command Center would chart all games the same way
+and publish:
+
+```
+season int, team text, side text,            -- 'off' | 'def'
+zone text,                                   -- 'short-left' … 'deep-right'
+att int, cmp int, yds int, td int, success int,
+generated_at timestamptz
+primary key (season, team, side, zone)
+```

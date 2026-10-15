@@ -131,15 +131,43 @@
 .tp-sc-axis { stroke: rgba(255, 255, 255, 0.2); stroke-dasharray: 3 3; }
 .tp-sc-q { fill: var(--dim); font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; }
 .tp-sc-ax { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
-.tp-sc-dot { fill: rgba(255, 255, 255, 0.24); cursor: pointer; }
-.tp-sc-conf { fill: transparent; stroke: var(--soft); stroke-width: 1.3; cursor: pointer; }
-.tp-sc-dot:hover, .tp-sc-conf:hover { fill: #fff; }
-.tp-sc-named { cursor: pointer; }
-.tp-sc-named circle { fill: transparent; stroke: #fff; stroke-width: 1.6; }
-.tp-sc-named text { fill: var(--soft); font-family: var(--mono); font-size: 11px; }
-.tp-sc-halo { fill: var(--green); opacity: 0.18; }
-.tp-sc-core { fill: var(--green); stroke: var(--ink2); stroke-width: 2; }
+/* Everyone faded and grey, conference a little brighter; hover brings a team up to full colour. */
+.tp-sc-team { cursor: pointer; opacity: 0.28; filter: grayscale(0.7); transition: opacity 0.12s, filter 0.12s; }
+.tp-sc-team.conf { opacity: 0.5; filter: grayscale(0.3); }
+.tp-sc-team.named { opacity: 0.95; filter: none; }
+.tp-sc-team:hover { opacity: 1; filter: none; }
+.tp-sc-team circle { fill: #fff; }
+.tp-sc-team text { fill: var(--soft); font-family: var(--mono); font-size: 11px; }
+.tp-sc-halo { fill: var(--green); opacity: 0.16; stroke: var(--green); stroke-width: 1.5; stroke-opacity: 0.6; }
 .tp-sc-me text { fill: var(--green); font-weight: 800; font-size: 13px; letter-spacing: 0.04em; }
+
+/* passing by zone */
+.tp-pz { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr); gap: 28px; align-items: start; }
+.tp-pz-field { position: relative; padding-left: 26px; }
+.tp-pz-depth {
+  position: absolute; left: 0; top: 25%; transform: translate(-50%, -50%) translateX(10px) rotate(-90deg);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim);
+}
+.tp-pz-depth--short { top: 75%; }
+.tp-pz-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.tp-pz-cell {
+  display: flex; flex-direction: column; gap: 2px; padding: 14px 14px 12px; min-height: 138px; border-radius: 8px;
+  border: 1px solid var(--inkline);
+}
+.tp-pz-cell.thin { border-style: dashed; }
+.tp-pz-name { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
+.tp-pz-big { font-weight: 850; font-size: 30px; font-stretch: 112%; letter-spacing: -0.01em; margin-top: 6px; line-height: 1; }
+.tp-pz-k { font-family: var(--mono); font-size: 10px; color: var(--soft); margin-bottom: 6px; }
+.tp-pz-line { font-family: var(--mono); font-size: 11px; color: #fff; opacity: 0.85; }
+.tp-pz-los {
+  display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 2px solid var(--green);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--dim);
+}
+.tp-pz-read { display: flex; flex-direction: column; gap: 16px; }
+.tp-pz-stat { display: flex; flex-direction: column; gap: 4px; }
+.tp-pz-notes { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--soft); line-height: 1.45; }
+.tp-pz-notes b { color: #fff; }
+.tp-pz-foot { font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.5; }
 
 /* down and play type */
 .tp-sit { display: grid; grid-template-columns: minmax(96px, auto) repeat(4, minmax(0, 1fr)); gap: 4px; }
@@ -168,7 +196,7 @@
 .tp-note p { font-size: 13px; color: var(--soft); line-height: 1.5; margin-top: 3px; }
 
 @media (max-width: 1080px) {
-  .tp-hero-in, .tp-grid--2 { grid-template-columns: 1fr; }
+  .tp-hero-in, .tp-grid--2, .tp-pz { grid-template-columns: 1fr; }
   .tp-gamecard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tp-gamecard > :first-child, .tp-gamecard > .tp-mu { grid-column: 1 / -1; }
 }
@@ -180,6 +208,9 @@
   .tp-fp .tp-strip { grid-column: 1 / -1; grid-row: 2; }
   .tp-sit { grid-template-columns: 72px repeat(4, minmax(0, 1fr)); }
   .tp-sit-c { font-size: 12px; }
+  .tp-pz-cell { padding: 10px 8px; min-height: 0; }
+  .tp-pz-big { font-size: 22px; }
+  .tp-pz-line { font-size: 10px; }
   .tp-sit-h { font-size: 9px; letter-spacing: 0; overflow-wrap: anywhere; }
   .tp-mu-k { min-width: 0; display: block; }
 }
