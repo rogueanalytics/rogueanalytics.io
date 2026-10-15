@@ -101,21 +101,7 @@ export function useProjections() {
   return { status: 'live', slates: result }
 }
 
-export function useGamebooks() {
-  const p = previewState()
-  if (p === 'live') {
-    return {
-      skeleton: true,
-      freePreview: { id: 'preview' },
-      days: [
-        { day: 'Thursday', games: [{ id: 't1' }] },
-        { day: 'Friday', games: [{ id: 'f1' }, { id: 'f2' }] },
-        { day: 'Saturday', games: [{ id: 's1' }, { id: 's2' }, { id: 's3' }, { id: 's4' }] },
-      ],
-    }
-  }
-  return { freePreview: null, days: [] }
-}
+// Game Books load through lib/gamebook.js.
 
 // ---------------------------------------------------------------------
 // Team rankings. The CFB Command Center publishes three tables and a meta

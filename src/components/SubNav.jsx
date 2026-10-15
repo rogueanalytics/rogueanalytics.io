@@ -14,7 +14,9 @@ export default function SubNav() {
         <NavLink className="nav-a subnav-a" to="/college-football/projections">
           Projections
         </NavLink>
-        {/* Game Book tab goes here once Game Books are live. */}
+        <NavLink className="nav-a subnav-a" to="/college-football/gamebooks">
+          Game Books
+        </NavLink>
       </div>
     </div>
   )

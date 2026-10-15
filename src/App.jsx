@@ -8,6 +8,7 @@ import Teams from './pages/Teams.jsx'
 import TeamProfile from './pages/TeamProfile.jsx'
 import Players from './pages/Players.jsx'
 import Gamebooks from './pages/Gamebooks.jsx'
+import Gamebook from './pages/Gamebook.jsx'
 import Analytics from './pages/Analytics.jsx'
 import About from './pages/About.jsx'
 import Privacy from './pages/Privacy.jsx'
@@ -53,7 +54,9 @@ export default function App() {
           <Route path="sports/ncaaf" element={<OldNcaafPage />} />
           {/* One projection table, one address. */}
           <Route path="sports/ncaaf/projections" element={<Navigate to="/college-football/projections" replace />} />
-          <Route path="sports/ncaaf/gamebooks" element={membersOnly(<Gamebooks />)} />
+          <Route path="sports/ncaaf/gamebooks" element={<Navigate to="/college-football/gamebooks" replace />} />
+          <Route path="college-football/gamebooks" element={membersOnly(<Gamebooks />)} />
+          <Route path="college-football/gamebooks/:gameId" element={membersOnly(<Gamebook />)} />
           <Route path="college-football/projections" element={<Projections />} />
           <Route path="college-football/teams" element={<Teams />} />
           <Route path="college-football/teams/:slug" element={<TeamProfile />} />
