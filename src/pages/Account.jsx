@@ -1,6 +1,8 @@
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
-import { PLANS, planById } from '../config/plans';
+import { MANAGE_SUBSCRIPTION_URL, PLANS, planById } from '../config/plans';
+import CheckoutButton from '../components/CheckoutButton';
+import { useBillingSync } from '../lib/billing';
 import '../styles/account.css';
 
 const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -10,6 +12,7 @@ export default function Account() {
     useAuth();
   const location = useLocation();
   const needsTier = location.state?.needsTier;
+  const awaitingPayment = useBillingSync(new URLSearchParams(location.search).get('checkout') === 'success');
 
   if (accountLoading && !profile) return <div className="ra-auth-status">Loading your account…</div>;
 
@@ -63,10 +66,16 @@ export default function Account() {
         </dl>
       </section>
 
+      {awaitingPayment && (
+        <p className="ra-account-notice" role="status">
+          Thanks for subscribing. Your plan shows up here as soon as Buildr confirms the payment.
+        </p>
+      )}
+
       <section className="ra-account-section">
         <h2>Your plan</h2>
         {liveSubs.length === 0 ? (
-          <p className="ra-account-empty">You don't have a plan yet. Pick one below once checkout opens.</p>
+          <p className="ra-account-empty">You don't have a plan yet. Pick one below.</p>
         ) : (
           <ul className="ra-sub-list">
             {liveSubs.map((s) => (
@@ -80,9 +89,14 @@ export default function Account() {
             ))}
           </ul>
         )}
+        {subscriptions.some((s) => s.buildr_subscription_id) && (
+          <a className="ra-btn ra-btn--ghost ra-account-manage" href={MANAGE_SUBSCRIPTION_URL} target="_blank" rel="noreferrer">
+            Manage subscription
+          </a>
+        )}
       </section>
 
-      <section className="ra-account-section">
+      <section className="ra-account-section" id="plans">
         <h2>College football plans</h2>
         <div className="ra-plan-grid">
           {PLANS.map((plan) => {
@@ -97,14 +111,8 @@ export default function Account() {
                 <p className="ra-plan-desc">{plan.description}</p>
                 {owned ? (
                   <span className="ra-plan-owned">Included in your plan</span>
-                ) : plan.whopCheckoutUrl ? (
-                  <a className="ra-btn ra-btn--primary" href={plan.whopCheckoutUrl}>
-                    Subscribe to {plan.name}
-                  </a>
                 ) : (
-                  <button type="button" className="ra-btn ra-btn--primary" disabled>
-                    Checkout opens soon
-                  </button>
+                  <CheckoutButton plan={plan} />
                 )}
               </article>
             );
