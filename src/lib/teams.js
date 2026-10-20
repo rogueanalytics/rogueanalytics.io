@@ -71,6 +71,7 @@ function toGame(event, teamId) {
     us: completed ? score(us) : null,
     them: completed ? score(them) : null,
     won: completed ? !!us?.winner : null,
+    rank: apRank(us?.curatedRank?.current),
     opp: {
       id: them?.team?.id ?? null,
       name: them?.team?.location ?? them?.team?.displayName ?? 'TBD',
@@ -81,7 +82,11 @@ function toGame(event, teamId) {
   }
 }
 
-// One team's ESPN profile and schedule. `name` is the stats tables' team name.
+const average = (xs) => (xs.length ? xs.reduce((a, x) => a + x, 0) / xs.length : null)
+
+// One team's ESPN profile and schedule, both from the schedule endpoint. (ESPN's /teams/{id}
+// endpoint stopped sending CORS headers in October 2026, so browsers can't read it.)
+// `name` is the stats tables' team name.
 // status: 'idle' | 'loading' | 'error' | 'ready'; when ready: { team, games }
 export function useEspnTeam(name, season) {
   const key = name ? `${name}:${season ?? ''}` : null
@@ -95,30 +100,29 @@ export function useEspnTeam(name, season) {
         const id = ESPN_IDS[normName(name)]
         if (!id) throw new Error(`No ESPN id for ${name}; add it to lib/espnTeamIds.js`)
         const q = season ? `?season=${season}` : ''
-        return Promise.all([getJson(`${ESPN}/teams/${id}`), getJson(`${ESPN}/teams/${id}/schedule${q}`)]).then(
-          ([t, s]) => {
-            const team = t.team
-            const stats = Object.fromEntries((team.record?.items?.[0]?.stats ?? []).map((x) => [x.name, x.value]))
-            const games = (s.events ?? []).map((e) => toGame(e, id)).sort((a, b) => a.date.localeCompare(b.date))
-            return {
-              team: {
-                id,
-                name: team.displayName,
-                nickname: team.name,
-                abbr: team.abbreviation,
-                color: team.color ? `#${team.color}` : null,
-                altColor: team.alternateColor ? `#${team.alternateColor}` : null,
-                logo: logoOf(team),
-                rank: apRank(team.rank),
-                standing: team.standingSummary ?? null,
-                record: team.record?.items?.[0]?.summary ?? null,
-                pointsFor: stats.avgPointsFor ?? null,
-                pointsAgainst: stats.avgPointsAgainst ?? null,
-              },
-              games,
-            }
-          },
-        )
+        return getJson(`${ESPN}/teams/${id}/schedule${q}`).then((s) => {
+          const team = s.team ?? {}
+          const games = (s.events ?? []).map((e) => toGame(e, id)).sort((a, b) => a.date.localeCompare(b.date))
+          const played = games.filter((g) => g.completed && g.us != null && g.them != null)
+          // The current AP rank rides on the next game, or on the last one once the season is over.
+          const current = games.find((g) => !g.completed) ?? games[games.length - 1]
+          return {
+            team: {
+              id,
+              name: team.displayName,
+              nickname: team.name,
+              abbr: team.abbreviation,
+              color: team.color ? `#${team.color}` : null,
+              logo: `https://a.espncdn.com/i/teamlogos/ncaa/500-dark/${id}.png`,
+              rank: current?.rank ?? null,
+              standing: team.standingSummary ?? null,
+              record: team.recordSummary ?? null,
+              pointsFor: average(played.map((g) => g.us)),
+              pointsAgainst: average(played.map((g) => g.them)),
+            },
+            games,
+          }
+        })
       })
       .then(
         (data) => !cancelled && setResult({ key, data }),
