@@ -262,3 +262,27 @@
 @media (prefers-reduced-motion: reduce) {
   .ra-btn { transition: none; }
 }
+
+/* ---------- Checkout ---------- */
+.ra-account-manage { margin-top: 1rem; }
+.ra-checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ra-checkout label {
+  color: var(--ra-muted);
+  font-size: 0.85rem;
+}
+.ra-checkout input {
+  font: inherit;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--ra-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ra-text);
+}
+.ra-checkout input:focus-visible {
+  outline: 2px solid var(--ra-green);
+  outline-offset: 1px;
+}
