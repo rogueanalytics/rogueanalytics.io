@@ -2,7 +2,7 @@ import Seam from '../components/Seam.jsx'
 import { CONTACT_EMAIL } from '../config.js'
 import { usePageMeta } from '../lib/usePageMeta.js'
 
-const UPDATED = 'October 12, 2026'
+const UPDATED = 'October 28, 2026'
 
 export default function Privacy() {
   usePageMeta('Privacy Policy | Rogue Analytics', 'What Rogue Analytics collects, why, and who it is shared with.')
@@ -36,20 +36,29 @@ export default function Privacy() {
               email address, so we can reply.
             </p>
             <p>
-              <strong>In your browser</strong>, we store a sign-in session so you stay logged in. We do not use
+              <strong>When you browse the site</strong>, Google Analytics records which pages you visit, which buttons
+              you click, and general details like your browser, device and approximate location. It uses cookies to
+              count repeat visits. We use these statistics to see what is useful and improve the site, never to
+              identify you. You can block them with your browser's privacy settings or Google's{' '}
+              <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noreferrer">opt-out add-on</a>.
+            </p>
+            <p>
+              <strong>In your browser</strong>, we also store a sign-in session so you stay logged in. We do not use
               advertising cookies or sell tracking data.
             </p>
 
             <h2 className="disp h5">How we use it</h2>
             <p>
-              To run your account, give you access to what you subscribed to, answer your messages, and contact you
-              about your account or subscription. We do not sell or rent your personal information.
+              To run your account, give you access to what you subscribed to, answer your messages, contact you about
+              your account or subscription, and understand how the site is used. We do not sell or rent your personal
+              information.
             </p>
 
             <h2 className="disp h5">Who processes it for us</h2>
             <ul>
               <li>Supabase: account database and sign-in</li>
               <li>Google and Discord: sign-in, if you choose them</li>
+              <li>Google Analytics: site usage statistics</li>
               <li>Buildr and Whop: subscriptions and payments</li>
               <li>Formspree: contact form delivery</li>
               <li>GitHub Pages: website hosting</li>
