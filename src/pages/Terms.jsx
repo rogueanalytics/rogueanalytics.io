@@ -77,7 +77,7 @@ export default function Terms() {
             <h2 className="disp h5">Contact</h2>
             <p>
               Questions:{' '}
-              {CONTACT_EMAIL ? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> : 'use the contact form on our Analytics page'}
+              {CONTACT_EMAIL ? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> : 'use the contact form on our Consulting page'}
               . See also our <Link to="/privacy">Privacy Policy</Link>.
             </p>
           </div>

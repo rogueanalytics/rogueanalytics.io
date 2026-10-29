@@ -185,6 +185,9 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          <NavLink className="nav-a" to="/consulting">
+            Consulting
+          </NavLink>
           <NavLink className="nav-a" to="/about">
             About
           </NavLink>

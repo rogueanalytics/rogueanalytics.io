@@ -40,11 +40,11 @@ export default function About() {
         <div className="wrap">
           <div className="soon-card">
             <div className="stack stack--sm">
-              <span className="eb eb--muted">Analytics consulting</span>
-              <h2 className="disp h5">Models, apps and data systems for teams outside sports.</h2>
+              <span className="eb eb--muted">Consulting</span>
+              <h2 className="disp h5">Custom tools, betting analytics and automation for bettors and businesses.</h2>
             </div>
-            <ArrowLink to="/analytics" variant="line">
-              Explore Analytics Solutions
+            <ArrowLink to="/consulting" variant="line">
+              Explore Consulting
             </ArrowLink>
           </div>
         </div>

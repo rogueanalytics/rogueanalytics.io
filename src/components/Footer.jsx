@@ -33,7 +33,7 @@ const COLUMNS = [
     label: 'Company',
     links: [
       ['About', '/about'],
-      ['Analytics consulting', '/analytics'],
+      ['Consulting', '/consulting'],
       ['Privacy Policy', '/privacy'],
       ['Terms of Service', '/terms'],
     ],

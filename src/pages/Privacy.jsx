@@ -77,7 +77,7 @@ export default function Privacy() {
             <h2 className="disp h5">Contact</h2>
             <p>
               Questions or requests:{' '}
-              {CONTACT_EMAIL ? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> : 'use the contact form on our Analytics page'}
+              {CONTACT_EMAIL ? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> : 'use the contact form on our Consulting page'}
               .
             </p>
           </div>

@@ -72,6 +72,8 @@ button, input, select, textarea { font: inherit; }
 .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 5vw, 60px); }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .grid-stretch { align-items: stretch; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.plain-list { list-style: none; padding: 0; margin: 0; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .self-start { align-self: flex-start; }
 .section { padding: clamp(48px, 7vw, 80px) 0; }
@@ -306,6 +308,9 @@ button, input, select, textarea { font: inherit; }
 .checks svg { flex-shrink: 0; margin-top: 1px; color: var(--green-ink); }
 .card--dark .checks li { color: var(--faint); }
 .card--dark .checks svg { color: var(--green); }
+.band .checks li { color: var(--faint); font-size: 17px; }
+.band .checks svg { color: var(--green); }
+a.card--dark:hover h3 { color: var(--green); }
 
 .table-wrap { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
 .compare { width: 100%; min-width: 560px; border-collapse: collapse; }
@@ -341,10 +346,10 @@ button, input, select, textarea { font: inherit; }
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--body); font-weight: 600;
 }
-.field input, .field textarea {
+.field input, .field textarea, .field select {
   font-size: 15px; padding: 12px 14px; border: 1px solid #cacac6; border-radius: 8px; background: #fff; color: var(--text);
 }
-.field input { height: 48px; }
+.field input, .field select { height: 48px; }
 .field textarea { resize: vertical; }
 .form-error { color: #a4261c; font-weight: 600; }
 .form-done { display: flex; flex-direction: column; gap: 10px; padding: 28px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
@@ -531,7 +536,7 @@ a.rk-name:hover { color: var(--green); text-decoration: underline; text-underlin
   .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 860px) {
-  .split, .grid-2, .product { grid-template-columns: 1fr; }
+  .split, .grid-2, .grid-3, .product { grid-template-columns: 1fr; }
   .product { gap: 32px; }
 }
 @media (max-width: 560px) {
